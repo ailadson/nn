@@ -1,11 +1,27 @@
 import math
+import numpy as np
 
 def sigmoid(source, des = None):
-    if isinstance(source, list):
-        for i, val in enumerate(source):
-            des[i] = 1/(1+math.exp(-val))
+    if isinstance(source, np.ndarray):
+        np.copyto(des, source)
+        des *= -1
+        np.exp(des, out = des)
+        des += 1
+        np.reciprocal(des, out = des)
     else:
         return 1/(1+math.exp(-source))
+
+def tanh(source, des = None):
+    return np.tanh(source, out = des)
+
+def deriv_tanh(z, des = None):
+    if isinstance(z, np.ndarray):
+        tanh(z, des)
+        des *= des
+        des *= -1
+        des += 1
+    else:
+        return 1 - tanh(z)**2
 
 def inner_product(left, right):
     if len(left) != len(right):
@@ -36,11 +52,11 @@ def matrix_times_vec(mat, vec, output = None):
         output[i] = inner_product(row, vec)
     return output
 
-def cross_entropy(estimated_prob_pos, observation):
-    if observation == 1:
-        estimated_prob = estimated_prob_pos
-    else:
-        estimated_prob = 1 - estimated_prob_pos
+def cross_entropy(estimated_probs, true_class_idx):
+    estimated_prob = estimated_probs[true_class_idx]
+    if estimated_prob == 0: #underflow error, return high loss
+        print(estimated_probs)
+        return 100
     return -1 * math.log(estimated_prob)
 
 def derivative_of_ce(estimated_prob_pos, observation):
@@ -49,8 +65,16 @@ def derivative_of_ce(estimated_prob_pos, observation):
     else:
         return 1/(1 - estimated_prob_pos)
 
-def derivative_of_sig(z):
-    return sigmoid(z) * (1 - sigmoid(z))
+def derivative_of_sig(z, des = None):
+    if isinstance(z, np.ndarray):
+        temp = np.copy(z)
+        sigmoid(z, des)
+        sigmoid(temp, temp)
+        temp *= -1
+        temp += 1
+        des *= temp
+    else:
+        return sigmoid(z) * (1 - sigmoid(z))
 
 def zeros(shape):
     if len(shape) == 2:
@@ -63,3 +87,21 @@ def zeros(shape):
 
 def zeros_like(mat):
     return zeros([len(mat), len(mat[0])])
+
+def softmax(values, des = None):
+    if des is not None:
+        np.exp(values, des)
+        sum_e = sum(des)
+        if math.isnan(sum_e):
+            print(values)
+            print(des)
+            raise Exception()
+        des /= sum_e
+    else:
+        raise Exception("Not implemented!!!!!!!!!")
+
+def derivative_of_softmax_and_ce(activations, true_class_idx, des):
+    np.exp(activations, out = des)
+    sum_of_exp_activations = sum(des)
+    des /= sum_of_exp_activations
+    des[true_class_idx] -= 1

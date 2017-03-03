@@ -1,10 +1,11 @@
 from functions import zeros
+import numpy as np
 
 class DerivativeCache:
     def __init__(self, layer):
-        self.weights = zeros([layer.num_units, layer.prev_layer.num_units])
-        self.unit_outputs = zeros([layer.num_units])
-        self.unit_total_inputs = zeros([layer.num_units])
+        self.weights = np.zeros([layer.num_units, layer.prev_layer.num_units])
+        self.unit_outputs = np.zeros([layer.num_units])
+        self.unit_total_inputs = np.zeros([layer.num_units])
         self.reset()
 
     def reset(self):

@@ -34,16 +34,30 @@ class Layer:
         self.deriv_cache.reset()
         self.deriv_wrt_weights()
 
+    # def deriv_wrt_unit_outputs(self):
+    #     if self.deriv_cache.is_set("unit_outputs"):
+    #         return self.deriv_cache.unit_outputs
+    #
+    #     next_deriv_wrt_unit_total_inputs = self.next_layer.deriv_wrt_unit_total_inputs()
+    #
+    #     for i in range(self.num_units):
+    #         sum_v = 0
+    #         for j in range(self.next_layer.num_units):
+    #             sum_v += (next_deriv_wrt_unit_total_inputs[j] * self.weights[i][j])
+    #         self.deriv_cache.unit_outputs[i] =  sum_v
+    #
+    #     return self.deriv_cache.unit_outputs
+
     def deriv_wrt_unit_outputs(self):
         if self.deriv_cache.is_set("unit_outputs"):
             return self.deriv_cache.unit_outputs
 
         next_deriv_wrt_unit_total_inputs = self.next_layer.deriv_wrt_unit_total_inputs()
 
-        for i in range(self.num_units):
+        for j in range(self.next_layer.num_units):
             sum_v = 0
-            for j in range(self.next_layer.num_units):
-                sum_v += (next_deriv_wrt_unit_total_inputs[j] * self.weights[i][j])
+            for i in range(self.num_units):
+                sum_v += (next_deriv_wrt_unit_total_inputs[j] * self.next_layer.weights[i][j])
             self.deriv_cache.unit_outputs[i] =  sum_v
 
         return self.deriv_cache.unit_outputs

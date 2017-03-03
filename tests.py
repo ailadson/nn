@@ -1,5 +1,7 @@
 from net import *
 from functions import *
+import numpy as np
+
 
 def assert_array_eql(arr1, arr2):
     for i in range(len(arr1)):
@@ -8,10 +10,10 @@ def assert_array_eql(arr1, arr2):
 def forward_propagate():
     nn = Net(2)
     nn.add_layer(2)
-    nn.layers[-1].weights = [[1,-1],[-3,4]]
+    nn.layers[-1].weights = np.array([[1.0,-1.0],[-3.0,4.0]])
     nn.add_output_layer(1)
-    nn.layers[-1].weights = [[1, -1]]
-    output = nn.forward_propagate([1,2])
+    nn.layers[-1].weights = np.array([[1.0, -1.0]])
+    output = nn.forward_propagate(np.array([1.0,2.0]))
 
     assert_array_eql(output, [0.3264323453466589])
     assert_array_eql(nn.layers[1].output, [0.2689414213699951, 0.9933071490757153])
@@ -19,14 +21,13 @@ def forward_propagate():
 def back_propagate():
     nn = Net(2)
     nn.add_layer(2)
-    nn.layers[-1].weights = [[1,-1],[-3,4]]
+    nn.layers[-1].weights = np.array([[1.0,-1.0],[-3.0,4.0]])
     nn.add_output_layer(1)
-    nn.layers[-1].weights = [[1, -1]]
+    nn.layers[-1].weights = np.array([[1.0, -1.0]])
 
-    nn.forward_propagate([1,2])
-    nn.back_propagate(1)
+    nn.forward_propagate(np.array([1.0,2.0]))
+    nn.back_propagate(1.0)
 
-    print(nn.layers[-1].deriv_cache)
     assert_array_eql(nn.layers[-1].deriv_cache.unit_outputs, [-3.0634219134688925])
 
     expected_total_input = 0.2689414213699951 - 0.9933071490757153

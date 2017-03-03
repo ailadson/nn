@@ -1,15 +1,20 @@
 from file_reader import FileReader
 from collections import Counter
 import math
+import numpy as np
 
 class Vocabulary:
-    SMOOTHING = 20
+    SMOOTHING = 30
     LOR_THRESHOLD = math.log(1.15)
 
     def __init__(self, reviews, labels):
         self.reviews = reviews
         self.labels = labels
         self._feature_dict_ = None
+        self._unfeature_dict_ = None
+
+    def featurize_labels(self):
+        return map(lambda val: [1,0] if val == 1 else [0,1], self.labels)
 
     def num_of_items(self):
         return len(self.feature_dict())
@@ -65,7 +70,18 @@ class Vocabulary:
         return self._feature_dict_
 
     def unfeature_dict(self):
-        return { v : k for k, v in self.feature_dict().items() }
+        if self._unfeature_dict_ is None:
+            self._unfeature_dict_ = { v : k for k, v in self.feature_dict().items() }
+        return self._unfeature_dict_
+
+    def unfeature_word_indices(self, word_indices):
+        unfeature_dict = self.unfeature_dict()
+        words = []
+
+        for idx in word_indices:
+                words.append( unfeature_dict[idx] )
+
+        return words
 
     def unfeature_review(self, review):
         unfeature_dict = self.unfeature_dict()
@@ -91,4 +107,4 @@ class Vocabulary:
         for word in review:
             if word in feature_hash:
                 features[ feature_hash[word] ] = 1
-        return features
+        return np.array(features)

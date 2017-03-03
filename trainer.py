@@ -1,4 +1,6 @@
 from functions import *
+import numpy as np
+
 
 class Trainer:
     def __init__(self, net, learning_rate):
@@ -12,7 +14,7 @@ class Trainer:
             if i == 0:
                 weights_mats.append(None)
             else:
-                weights_mats.append( zeros_like(layer.weights) )
+                weights_mats.append( np.zeros(layer.weights.shape) )
         return weights_mats
 
     def train_with_examples(self,examples):
@@ -27,21 +29,21 @@ class Trainer:
 
     def train_with_example(self, example):
         ipt, opt = example
-        output = self.net.forward_propagate(ipt)[0] #unwrapping
+        output = self.net.forward_propagate(ipt)
         self.net.back_propagate(opt)
         self.update_weight_deriv_mats()
-        loss = cross_entropy(output, opt)
-        guess = 1 if output >= 0.5 else 0
-        misclassification = 1 if opt != guess else 0
+        loss = cross_entropy(output, opt.index(1))
+        estimated_true_class_idx = list(output).index( max(output) )
+        misclassification = 1 if opt.index( 1 ) != estimated_true_class_idx else 0
         return (loss, misclassification)
 
     def update_weight_deriv_mats(self):
         for i, layer in enumerate(self.net.layers):
             if i == 0: continue
-            matrix_add(layer.deriv_cache.weights, self.weight_deriv_mats[i])
+            self.weight_deriv_mats[i] += layer.deriv_cache.weights
 
     def update_weights(self, num_of_examples):
         for i, layer in enumerate(self.net.layers):
             if i == 0: continue
-            matrix_scale(self.weight_deriv_mats[i], -self.learning_rate / num_of_examples)
-            matrix_add(self.weight_deriv_mats[i], layer.weights)
+            self.weight_deriv_mats[i] *= (-self.learning_rate / num_of_examples)
+            layer.weights += self.weight_deriv_mats[i]
