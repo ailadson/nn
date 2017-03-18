@@ -5,7 +5,7 @@ from itertools import product
 from deriv_cache import DerivativeCache
 import numpy as np
 
-class Layer:
+class FullConnectedLayer:
     @staticmethod
     def w_bound(num_units, prev_units):
         return 4 * math.sqrt(6 / (num_units + prev_units))
@@ -17,7 +17,7 @@ class Layer:
         self.next_layer = None
         prev_layer.next_layer = self
         self.num_units = num_units
-        self.w_bound = Layer.w_bound(num_units, prev_layer.num_units)
+        self.biases = np.zeros(num_units)
         #weight col correspond to prev units. rows correspond to our units
         self.weights = self.generate_weight_mat()
         self.output = np.zeros([num_units])
@@ -26,11 +26,13 @@ class Layer:
 
 
     def generate_weight_mat(self):
+        self.w_bound = Layer.w_bound(num_units, prev_layer.num_units)
         num_prev_units = self.prev_layer.num_units
         return np.random.uniform(-self.w_bound, self.w_bound, [self.num_units, num_prev_units])
 
     def forward_propagate(self):
         self.weights.dot(self.prev_layer.output, out = self.total_input)
+        self.total_input += self.biases
         self.activation_func(self.total_input, self.output)
 
     def back_propagate(self):

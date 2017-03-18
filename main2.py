@@ -18,19 +18,19 @@ def train_epoch(nn, t, epoch_num, training_set, validation_set):
     print(f"Epoch number {epoch_num}")
     batches = batch_data(training_set, 1)
     batch_d = None
-    batch_loss = 0
-    batch_misclas_rate = 0
+    total_batch_loss = 0
+    total_batch_misclassification = 0
 
     for i, batch in enumerate(batches):
         batch_d = t.train_with_examples(batch)
-        batch_loss += batch_d[0]
-        batch_misclas_rate+= batch_d[1]
+        total_batch_loss += batch_d[0]
+        total_batch_misclassification += batch_d[1]
         if (i+1) % 11000 == 0:
             print(f"Batch {i + 1} of {len(batches)}")
 
     loss, misclassification = evaluate(validation_set, nn)
 
-    print(f"Avg Batch Loss: {batch_loss/len(batches)} | Avg Batch Misclassification: {batch_misclas_rate/len(batches)}")
+    print(f"Training Loss: {total_batch_loss/len(batches)} | Training Misclassification: {total_batch_misclassification/len(batches)}")
     print(f"Last Batch Loss: {batch_d[0]} | Last Batch Misclassification: {batch_d[1]}")
     print(f"Epoch number {epoch_num} Loss: {loss} | Epoch number {epoch_num} Misclassification: {misclassification}")
 
@@ -49,16 +49,16 @@ def prompt_save(nn):
 def load_model(name):
     return pickle.load( open( f"./models/{name}.p", "rb" ) )
 
-print("MODEL 2")
-print("~"*20)
-#Epoch number 9 Loss: 1.4840154230518507 | Epoch number 9 Misclassification: 0.0242
+# print("MODEL 2")
+# print("~"*20)
+# #Epoch number 9 Loss: 1.4840154230518507 | Epoch number 9 Misclassification: 0.0242
 nn2 = Net(mnist.test.images.shape[1])
 nn2.add_layer(510)
 nn2.add_layer(203)
 nn2.add_output_layer(10)
-
+#
 t2 = Trainer(nn2, 0.1)
-
+#
 for i in range(10):
     train_epoch(nn2, t2, i, train_observations, validation_observations)
-prompt_save(nn2)
+# prompt_save(nn2)

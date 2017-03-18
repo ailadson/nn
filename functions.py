@@ -100,8 +100,14 @@ def softmax(values, des = None):
     else:
         raise Exception("Not implemented!!!!!!!!!")
 
-def derivative_of_softmax_and_ce(activations, true_class_idx, des):
-    np.exp(activations, out = des)
-    sum_of_exp_activations = sum(des)
-    des /= sum_of_exp_activations
+def derivative_of_softmax_and_ce(logits, true_class_idx, des):
+    np.exp(logits, out = des)
+    sum_of_exp_logits = sum(des)
+    des /= sum_of_exp_logits
     des[true_class_idx] -= 1
+
+def relu(values, des = None):
+    if des is not None:
+        np.copyto(des, np.maximum(values, 0))
+    else:
+        return np.maximum(values, 0)

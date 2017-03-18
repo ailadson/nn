@@ -6,12 +6,14 @@ class OutputLayer(Layer):
         super().__init__(prev_layer, num_units)
         self.observed_output = None
         self.true_class = None
-        self.activation_func = sigmoid # lambda val, des: np.copyto(des, val)
-        self.deriv_activation_func = derivative_of_sig # lambda val, des: des.fill(1)
+        self.log_outputs = np.zeros(num_units)
+        self.activation_func = lambda val, des: np.copyto(des, val)
+        self.deriv_activation_func = lambda val, des: des.fill(1)
 
     def forward_propagate(self):
         super().forward_propagate()
         self.output -= max(self.output)
+        # np.copyto(self.log_outputs , self.output)
         softmax(self.output, self.output)
 
     def set_observed_output(self, observed):
