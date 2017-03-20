@@ -12,6 +12,6 @@ class FlattenLayer():
     def back_propagate(self):
         pass
 
-    def deriv_wrt_unit_outputs(self):
-        next_deriv_wrt_unit_total_inputs = self.next_layer.deriv_wrt_unit_total_inputs()
+    def deriv_wrt_prev_outputs(self):
+        next_deriv_wrt_unit_total_inputs = self.next_layer.deriv_wrt_prev_outputs()
         return next_deriv_wrt_unit_total_inputs.reshape(self.prev_layer.output.shape)

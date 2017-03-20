@@ -4,13 +4,13 @@ import numpy as np
 class DerivativeCache:
     def __init__(self, layer):
         self.weights = np.zeros([layer.num_units, layer.prev_layer.num_units])
-        self.unit_outputs = np.zeros([layer.num_units])
+        self.prev_outputs = np.zeros([layer.prev_layer.num_units])
         self.unit_total_inputs = np.zeros([layer.num_units])
         self.reset()
 
     def reset(self):
         self.is_set_d = { "weights" : False,
-                        "unit_outputs" : False,
+                        "prev_outputs" : False,
                         "unit_total_inputs" : False
                     }
 
@@ -18,4 +18,11 @@ class DerivativeCache:
         return self.is_set_d[name]
 
     def __str__(self):
-        return f"Weights: {self.weights}\nUnit_outputs: {self.unit_outputs}\nunit_total_inputs: {self.unit_total_inputs}"
+        return f"Weights: {self.weights}\nPrev_outputs: {self.prev_outputs}\nunit_total_inputs: {self.unit_total_inputs}"
+
+class ConvDerivativeCache(DerivativeCache):
+    def __init__(self, layer):
+        self.weights = np.zeros(layer.weights.shape)
+        self.prev_outputs = np.zeros(layer.output.shape)
+        self.unit_total_inputs = np.zeros(layer.total_input)
+        self.reset()

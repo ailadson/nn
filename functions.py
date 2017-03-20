@@ -111,3 +111,38 @@ def relu(values, des = None):
         np.copyto(des, np.maximum(values, 0))
     else:
         return np.maximum(values, 0)
+
+def deriv_of_relu(values, des = None):
+    if des is not None:
+        des.fill(1)
+        des *= (values > 0)
+    else:
+        raise Exception("Not implemented")
+
+def deconvolve2d(ipt, error, deriv_filter):
+    num_of_rows, num_of_cols,  = len(deriv_filter), len(deriv_filter[0])
+
+    for i in range(num_of_rows):
+        for j in range(num_of_cols):
+            offset_row = i - math.floor(num_of_rows/2)
+            offset_col = j - math.floor(num_of_cols/2)
+            ipt_start_row, ipt_end_row, ipt_start_col, ipt_end_col = (
+                get_deconvolve_bounds(ipt, offset_row, offset_col)
+            )
+            error_start_row, error_end_row, error_start_col, error_end_col = (
+                get_deconvolve_bounds(error, -1 * offset_row, -1 * offset_col)
+            )
+            np_dot = (
+                ipt[ipt_start_row:ipt_end_row, ipt_start_col:ipt_end_col] *
+                error[error_start_row:error_end_row, error_start_col:error_end_col]
+            )
+            # += meant for accumulating errors in the deriv filter
+            deriv_filter[i, j] += np.sum(np_dot)
+
+def get_deconvolve_bounds(mat, offset_row, offset_col):
+    num_of_rows, num_of_cols = mat.shape
+    start_row = max(offset_row, 0)
+    end_row = min(offset_row + num_of_rows, num_of_rows)
+    start_col = max(offset_col, 0)
+    end_col = min(offset_col + num_of_cols, num_of_cols)
+    return (start_row, end_row, start_col, end_col)

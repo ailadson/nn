@@ -1,13 +1,13 @@
 from input_layer import InputLayer
 from output_layer import OutputLayer
-from layer import Layer
+from layer import FullyConnectedLayer
 
 class Net:
     def __init__(self, num_units):
         self.layers =[InputLayer(num_units)]
 
     def add_layer(self, num_units):
-        l = Layer(self.layers[-1], num_units)
+        l = FullyConnectedLayer(self.layers[-1], num_units)
         self.layers.append(l)
 
     def add_output_layer(self, num_units):
