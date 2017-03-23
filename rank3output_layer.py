@@ -34,6 +34,9 @@ class Rank3OutputLayer():
         np.copyto(self.deriv_cache.prev_outputs, self.observed_output)
         self.deriv_cache.prev_outputs -= self.prev_layer.output
         self.deriv_cache.prev_outputs *= -2
+        self.deriv_cache.prev_outputs /= (
+            ((self.observed_output - self.prev_layer.output) ** 2).sum()
+        )
         # print("Print Prev Output")
         # print(self.deriv_cache.prev_outputs)
         # print(self.prev_layer.output)

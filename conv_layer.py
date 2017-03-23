@@ -77,9 +77,11 @@ class ConvolutionalLayer():
             for input_layer_idx in range(ipt.shape[0]):
                 input_layer = ipt[input_layer_idx]
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
-                if flip:
+                # TODO: c2d flips the kernel. I'm not sure whether we
+                # should be padding here.
+                if not flip:
                     kernel_weights = np.fliplr(np.flipud(kernel_weights))
-                    kernel_weights = pad_flipped_weights(kernel_weights)
+                    #kernel_weights = pad_flipped_weights(kernel_weights)
                 des[output_layer_idx] += c2d(input_layer, kernel_weights, mode="same")
 
     def pad_flipped_weights(weights):
