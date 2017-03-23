@@ -1,47 +1,58 @@
 from PIL import Image
-from conv_layer import ConvolutionalLayer
-from rank3input_layer import Rank3Input
+from net import Net
 import numpy as np
 from functions import deconvolve2d
+from simple_trainer import SimpleTrainer
 
-filt = np.zeros([2, 2])
-ipt = np.array([[5,6],[7,8]])
-error = np.array([[1,2],[3,4]])
+# import data
+im = Image.open("./imgs/convolve_test3.jpeg")
+data = np.array(im)
+data = np.transpose(data, (2,0,1))
 
-deconvolve2d(ipt,error,filt)
-print(filt)
+# create net
+net = Net()
+net.add_rank3_input_layer((1, 4, 4))
+net.add_conv_layer(3, 3, 1)
+net.add_output_layer()
 
-# im = Image.open("./imgs/convolve_test3.jpeg")
-# data = np.array(im)
-# data = np.transpose(data, (2,0,1))
-# inputlayer = Rank3Input(data.shape)
-# inputlayer.set_input(data)
-# convlayer = ConvolutionalLayer(inputlayer, 3, 3, 3)
-# convlayer.weights = np.array([
+# get observed output
+# net.layers[1].weights = np.array([
 #     [
 #         np.zeros([3, 3]),
 #         [
 #         [-1,0,1],
-#         [-10,0,10],
+#         [-2,0,2],
 #         [-1,0,1]
 #         ],
 #         np.zeros([3, 3])
-#     ],
-#     [
-#         np.zeros([3, 3]),
-#         [
-#             [-1,-10,-1],
-#             [0,0,0],
-#             [1,10,1]
-#         ],
-#         np.zeros([3, 3])
-#     ],
-#     [
-#         np.zeros([3, 3]),
-#         np.zeros([3, 3]),
-#         np.zeros([3, 3]),
-#     ],
+#     ]
 # ])
+#
+# data = data.astype('float64')
+# data /= data.max()
+# observed = np.copy(net.forward_propagate(data))
+# observed /= observed.max()
+
+# randomize weights
+# net.layers[1].weights = net.layers[1].initialize_weights()
+
+# train
+data = np.ones([1, 4, 4]) * 4
+observed = np.ones([1, 4, 4]) * 2
+
+net.layers[1].weights.fill(1)
+print(net.layers[1].weights)
+t = SimpleTrainer(net, 0.0001)
+for i in range(1000):
+    t.train_with_examples([(data, observed)])
+t.learning_rate *= 0.1
+for i in range(9000):
+    t.train_with_examples([(data, observed)])
+
+print(net.layers[1].weights)
+print(net.layers[1].weights.sum())
+print(net.forward_propagate(data))
+
 # print(data.shape)
 # print(convlayer.output.shape)
 # convlayer.forward_propagate()

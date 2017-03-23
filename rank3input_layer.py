@@ -1,6 +1,6 @@
 import numpy as np
 
-class Rank3Input():
+class Rank3InputLayer():
     def __init__(self, shape):
         self.shape = shape
         self.output = np.zeros(shape)
@@ -10,5 +10,5 @@ class Rank3Input():
             raise Exception("Bad shape")
         np.copyto(self.output, ipt)
 
-    def forward_propagate():
+    def forward_propagate(self):
         pass

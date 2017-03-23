@@ -24,5 +24,5 @@ class ConvDerivativeCache(DerivativeCache):
     def __init__(self, layer):
         self.weights = np.zeros(layer.weights.shape)
         self.prev_outputs = np.zeros(layer.output.shape)
-        self.unit_total_inputs = np.zeros(layer.total_input)
+        self.unit_total_inputs = np.zeros(layer.total_input.shape)
         self.reset()

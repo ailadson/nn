@@ -1,17 +1,31 @@
 from input_layer import InputLayer
 from output_layer import OutputLayer
 from layer import FullyConnectedLayer
+from conv_layer import ConvolutionalLayer
+from rank3input_layer import Rank3InputLayer
+from rank3output_layer import Rank3OutputLayer
 
 class Net:
-    def __init__(self, num_units):
-        self.layers =[InputLayer(num_units)]
+    def __init__(self):
+        self.layers =[]
+
+    def add_input_layer(self, num_units):
+        self.layers.append(InputLayer(num_units))
+
+    def add_rank3_input_layer(self, shape):
+        self.layers.append(Rank3InputLayer(shape))
 
     def add_layer(self, num_units):
         l = FullyConnectedLayer(self.layers[-1], num_units)
         self.layers.append(l)
 
-    def add_output_layer(self, num_units):
-        l = OutputLayer(self.layers[-1], num_units)
+    def add_conv_layer(self, height, width, num_of_output_layers):
+        l = ConvolutionalLayer(self.layers[-1], height, width, num_of_output_layers)
+        self.layers.append(l)
+
+    def add_output_layer(self, num_units = None):
+        # l = OutputLayer(self.layers[-1], num_units)
+        l = Rank3OutputLayer(self.layers[-1])
         self.layers.append(l)
 
     def forward_propagate(self, input_v):

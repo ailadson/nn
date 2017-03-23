@@ -15,13 +15,15 @@ class ConvolutionalLayer():
         self.num_of_input_layers = prev_shape[0]
         self.output = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]])
         self.weights = self.initialize_weights()
-        self.activation_func = relu
-        self.deriv_activation_func = deriv_relu
+        self.activation_func = lambda val, des: np.copyto(des, val)
+        self.deriv_activation_func = lambda val, des: des.fill(1)
+        # self.activation_func = relu
+        # self.deriv_activation_func = deriv_of_relu
         self.total_input = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]])
         self.deriv_cache = ConvDerivativeCache(self)
 
     def initialize_weights(self):
-        return np.random.uniform(-1, 1, [
+        return np.random.uniform(0, 1, [
             self.output.shape[0],
             self.prev_layer.output.shape[0],
             self.height,
@@ -34,8 +36,10 @@ class ConvolutionalLayer():
         self.activation_func(self.total_input, self.output)
 
     def back_propagate(self):
+        self.deriv_cache.reset()
         self.deriv_wrt_weights()
-        #TODO wrt to total unit inputs
+        # print("Print Derivative Weights")
+        # print(self.deriv_cache.weights)
 
     def deriv_wrt_weights(self):
         if self.deriv_cache.is_set("weights"):
@@ -43,6 +47,7 @@ class ConvolutionalLayer():
 
         input_layers = self.prev_layer.output
         deriv_wrt_unit_total_inputs = self.deriv_wrt_unit_total_inputs()
+        self.deriv_cache.weights *= 0
         for output_layer_idx in range(self.weights.shape[0]):
             for input_layer_idx in range(input_layers.shape[0]):
                 input_layer = input_layers[input_layer_idx]
@@ -54,26 +59,35 @@ class ConvolutionalLayer():
         if self.deriv_cache.is_set("unit_total_inputs"):
             return self.deriv_cache.unit_total_inputs
 
-        deriv_wrt_unit_outputs = self.deriv_wrt_unit_outputs()
         self.deriv_activation_func(self.total_input, self.deriv_cache.unit_total_inputs)
-        self.deriv_cache.unit_total_inputs *= deriv_wrt_unit_outputs
+        self.deriv_cache.unit_total_inputs *= self.deriv_wrt_unit_outputs()
 
         return self.deriv_cache.unit_total_inputs
 
     def deriv_wrt_unit_outputs(self):
-        if self.deriv_cache.is_set("unit_outputs"):
-            return self.deriv_cache.unit_outputs
+        return self.next_layer.deriv_wrt_prev_outputs()
 
-        next_deriv_wrt_unit_total_inputs = self.next_layer.deriv_wrt_unit_total_inputs()
-        delta_out = np.ones(self.output.shape)
-        self.next_layer.apply_convolution(delta_out, self.deriv_cache.unit_outputs)
-        self.deriv_cache.unit_outputs *=
+    def deriv_wrt_prev_outputs(self):
+        if self.deriv_cache.is_set("prev_outputs"):
+            return self.deriv_cache.prev_outputs
+        apply_convolution(self.deriv_wrt_unit_total_inputs(), self.deriv_cache.prev_outputs, True)
 
-        return self.deriv_cache.unit_outputs
-
-    def apply_convolution(self, ipt, des):
+    def apply_convolution(self, ipt, des, flip = False):
         for output_layer_idx in range(self.weights.shape[0]):
             for input_layer_idx in range(ipt.shape[0]):
                 input_layer = ipt[input_layer_idx]
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
+                if flip:
+                    kernel_weights = np.fliplr(np.flipud(kernel_weights))
+                    kernel_weights = pad_flipped_weights(kernel_weights)
                 des[output_layer_idx] += c2d(input_layer, kernel_weights, mode="same")
+
+    def pad_flipped_weights(weights):
+        height, width = weights.shape
+        new_height = height + (1 if height % 2 == 0 else 0)
+        new_width = width + (1 if width % 2 == 0 else 0)
+        if height % 2 == 0:
+            weights = np.append(weights, np.zeros([1, width]), axis=0)
+        if width % 2 == 0:
+            weights = np.append(weights, np.zeros([new_height, 1]), axis=1)
+        return weights
