@@ -11,8 +11,8 @@ class FullyConnectedLayer:
         return 4 * math.sqrt(6 / (num_units + prev_units))
 
     def __init__(self, prev_layer, num_units):
-        self.activation_func = sigmoid
-        self.deriv_activation_func = derivative_of_sig
+        self.activation_func = relu
+        self.deriv_activation_func = deriv_of_relu
         self.prev_layer = prev_layer
         self.next_layer = None
         prev_layer.next_layer = self
@@ -68,3 +68,6 @@ class FullyConnectedLayer:
         deriv_wrt_unit_inputs = self.deriv_wrt_unit_total_inputs()
         np.outer(deriv_wrt_unit_inputs, self.prev_layer.output, self.deriv_cache.weights)
         return self.deriv_cache.weights
+
+    def has_weights(self):
+        return True

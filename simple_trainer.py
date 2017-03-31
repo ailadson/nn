@@ -12,7 +12,7 @@ class SimpleTrainer:
     def init_weight_deriv_mats(self):
         weights_mats = []
         for i, layer in enumerate(self.net.layers):
-            if i == 0:
+            if not layer.has_weights():
                 weights_mats.append(None)
             else:
                 weights_mats.append( np.zeros(layer.weights.shape) )
@@ -21,7 +21,7 @@ class SimpleTrainer:
     def init_bias_deriv_vecs(self):
         bias_vecs = []
         for i, layer in enumerate(self.net.layers):
-            if i == 0:
+            if not layer.has_weights():
                 bias_vecs.append(None)
             else:
                 bias_vecs.append( np.zeros(layer.biases.shape) )
@@ -41,14 +41,14 @@ class SimpleTrainer:
     #accumulate derivative over course of batch
     def update_weight_deriv_mats_and_bias_vecs(self):
         for i, layer in enumerate(self.net.layers):
-            if i == 0 or i == len(self.net.layers) - 1: continue
+            if not layer.has_weights(): continue
             self.weight_deriv_mats[i] += layer.deriv_cache.weights
             # self.bias_deriv_vecs[i] += layer.deriv_cache.unit_total_inputs
 
     #at the end of batch, perform update
     def update_weights_and_biases(self, num_of_examples):
         for i, layer in enumerate(self.net.layers):
-            if i == 0 or i == len(self.net.layers) - 1: continue
+            if not layer.has_weights(): continue
             self.weight_deriv_mats[i] *= (-self.learning_rate / num_of_examples)
             # self.bias_deriv_vecs[i] *= (-self.learning_rate / num_of_examples)
             layer.weights += self.weight_deriv_mats[i]

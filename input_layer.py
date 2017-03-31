@@ -10,3 +10,6 @@ class InputLayer:
 
     def forward_propagate(self):
         pass
+
+    def has_weights(self):
+        return False

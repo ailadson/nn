@@ -55,7 +55,9 @@ def matrix_times_vec(mat, vec, output = None):
 def cross_entropy(estimated_probs, true_class_idx):
     estimated_prob = estimated_probs[true_class_idx]
     if estimated_prob == 0: #underflow error, return high loss
+        print("CE Error?")
         print(estimated_probs)
+        raise "Hey"
         return 100
     return -1 * math.log(estimated_prob)
 

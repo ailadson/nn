@@ -41,7 +41,16 @@ class ConvolutionalLayer():
         # print("Print Derivative Weights")
         # print(self.deriv_cache.weights)
 
+    def regularized_deriv_wrt_weights(self):
+        deriv_wrt_weights = self.deriv_wrt_weights_()
+        deriv_wrt_weights += (20 * np.abs(self.weights))
+        deriv_wrt_weights[0, 0, 1, 1] -= (20 * np.abs(self.weights[0, 0, 1, 1]))
+        return deriv_wrt_weights
+
     def deriv_wrt_weights(self):
+        return self.deriv_wrt_weights_()
+
+    def deriv_wrt_weights_(self):
         if self.deriv_cache.is_set("weights"):
             return self.deriv_cache.weights
 
@@ -54,6 +63,7 @@ class ConvolutionalLayer():
                 bp_errors = deriv_wrt_unit_total_inputs[output_layer_idx]
                 deriv_filter = self.deriv_cache.weights[output_layer_idx, input_layer_idx]
                 deconvolve2d(input_layer, bp_errors, deriv_filter)
+        return self.deriv_cache.weights
 
     def deriv_wrt_unit_total_inputs(self):
         if self.deriv_cache.is_set("unit_total_inputs"):
@@ -70,11 +80,20 @@ class ConvolutionalLayer():
     def deriv_wrt_prev_outputs(self):
         if self.deriv_cache.is_set("prev_outputs"):
             return self.deriv_cache.prev_outputs
-        apply_convolution(self.deriv_wrt_unit_total_inputs(), self.deriv_cache.prev_outputs, True)
+        self.deriv_cache.prev_outputs *= 0
+        self.apply_backwards_convolution(self.deriv_wrt_unit_total_inputs(), self.deriv_cache.prev_outputs)
+        return self.deriv_cache.prev_outputs
+
+    def apply_backwards_convolution(self, deriv_wrt_total_inputs, deriv_wrt_prev_outputs):
+        for output_layer_idx in range(self.weights.shape[0]):
+            for input_layer_idx in range(self.weights.shape[1]):
+                total_input_layer = deriv_wrt_total_inputs[output_layer_idx]
+                kernel_weights = self.weights[output_layer_idx, input_layer_idx]
+                deriv_wrt_prev_outputs[input_layer_idx] += c2d(total_input_layer, kernel_weights, mode="same")
 
     def apply_convolution(self, ipt, des, flip = False):
         for output_layer_idx in range(self.weights.shape[0]):
-            for input_layer_idx in range(ipt.shape[0]):
+            for input_layer_idx in range(self.weights.shape[1]):
                 input_layer = ipt[input_layer_idx]
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
                 # TODO: c2d flips the kernel. I'm not sure whether we
@@ -93,3 +112,6 @@ class ConvolutionalLayer():
         if width % 2 == 0:
             weights = np.append(weights, np.zeros([new_height, 1]), axis=1)
         return weights
+
+    def has_weights(self):
+        return True

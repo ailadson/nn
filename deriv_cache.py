@@ -26,3 +26,9 @@ class ConvDerivativeCache(DerivativeCache):
         self.prev_outputs = np.zeros(layer.output.shape)
         self.unit_total_inputs = np.zeros(layer.total_input.shape)
         self.reset()
+
+class MaxPoolDerivativeCache(DerivativeCache):
+    def __init__(self, layer):
+        self.prev_outputs = np.zeros(layer.prev_layer.output.shape)
+        self.unit_total_inputs = np.zeros(layer.total_input.shape)
+        self.reset()
