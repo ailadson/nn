@@ -15,6 +15,7 @@ class ConvolutionalLayer():
         self.num_of_input_layers = prev_shape[0]
         self.output = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]])
         self.weights = self.initialize_weights()
+        self.biases = np.zeros((self.weights.shape[0], 1, 1))
         self.activation_func = lambda val, des: np.copyto(des, val)
         self.deriv_activation_func = lambda val, des: des.fill(1)
         # self.activation_func = relu
@@ -33,6 +34,7 @@ class ConvolutionalLayer():
     def forward_propagate(self):
         self.total_input *= 0
         self.apply_convolution(self.prev_layer.output, self.total_input)
+        self.total_input += self.biases
         self.activation_func(self.total_input, self.output)
 
     def back_propagate(self):
@@ -41,19 +43,20 @@ class ConvolutionalLayer():
         # print("Print Derivative Weights")
         # print(self.deriv_cache.weights)
 
-    def regularized_deriv_wrt_weights(self):
-        deriv_wrt_weights = self.deriv_wrt_weights_()
-        deriv_wrt_weights += (20 * np.abs(self.weights))
-        deriv_wrt_weights[0, 0, 1, 1] -= (20 * np.abs(self.weights[0, 0, 1, 1]))
-        return deriv_wrt_weights
+    # def regularized_deriv_wrt_weights(self):
+    #     deriv_wrt_weights = self.deriv_wrt_weights_()
+    #     deriv_wrt_weights += (20 * np.abs(self.weights))
+    #     deriv_wrt_weights[0, 0, 1, 1] -= (20 * np.abs(self.weights[0, 0, 1, 1]))
+    #     return deriv_wrt_weights
+
+    # def deriv_wrt_weights(self):
+    #     return self.deriv_wrt_weights_()
 
     def deriv_wrt_weights(self):
-        return self.deriv_wrt_weights_()
-
-    def deriv_wrt_weights_(self):
         if self.deriv_cache.is_set("weights"):
             return self.deriv_cache.weights
 
+        #TODO: Backprop the biases
         input_layers = self.prev_layer.output
         deriv_wrt_unit_total_inputs = self.deriv_wrt_unit_total_inputs()
         self.deriv_cache.weights *= 0

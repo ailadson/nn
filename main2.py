@@ -10,7 +10,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 
 def reshape_images(images):
-    return images#.reshape([-1, 1, 28, 28])
+    return images.reshape([-1, 1, 28, 28])
 
 def train_epoch(nn, t, epoch_num, training_set, validation_set):
     start_time = time.time()
@@ -24,8 +24,10 @@ def train_epoch(nn, t, epoch_num, training_set, validation_set):
         batch_d = t.train_with_examples(batch)
         # total_batch_loss += batch_d[0]
         # total_batch_misclassification += batch_d[1]
-        if (i+1) % 11000 == 0:
+        if (i+1) % 1100 == 0:
             print(f"Batch {i + 1} of {len(batches)}")
+            loss, misclassification = evaluate(validation_set, nn)
+            print((loss, misclassification))
 
     loss, misclassification = evaluate(validation_set, nn)
 
@@ -56,17 +58,16 @@ validation_observations = list(zip(reshape_images(mnist.validation.images), mnis
 train_observations = list(zip(reshape_images(mnist.train.images), mnist.train.labels))
 
 nn2 = Net()
-# nn2.add_rank3_input_layer((1, 28, 28))
-nn2.add_input_layer(28 * 28)
-# nn2.add_conv_layer(3,3,5)
+nn2.add_rank3_input_layer((1, 28, 28))
+nn2.add_conv_layer(3,3,20)
 # nn2.add_max_pool_layer()
 # nn2.add_conv_layer(5,5,40)
 # nn2.add_max_pool_layer()
-# nn2.add_flatten_layer()
-# nn2.add_fc_layer(100)
+nn2.add_flatten_layer()
+nn2.add_fc_layer(100)
 nn2.add_output_layer(10)
 #
-t2 = Trainer(nn2, 1.0)
+t2 = Trainer(nn2, 0.001)
 #
 for i in range(10):
     train_epoch(nn2, t2, i, train_observations, validation_observations)

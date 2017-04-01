@@ -6,12 +6,14 @@ class DerivativeCache:
         self.weights = np.zeros([layer.num_units, layer.prev_layer.num_units])
         self.prev_outputs = np.zeros([layer.prev_layer.num_units])
         self.unit_total_inputs = np.zeros([layer.num_units])
+        self.biases = np.zeros([layer.num_units])
         self.reset()
 
     def reset(self):
         self.is_set_d = { "weights" : False,
                         "prev_outputs" : False,
-                        "unit_total_inputs" : False
+                        "unit_total_inputs" : False,
+                        "biases" : False
                     }
 
     def is_set(self, name):
@@ -25,6 +27,7 @@ class ConvDerivativeCache(DerivativeCache):
         self.weights = np.zeros(layer.weights.shape)
         self.prev_outputs = np.zeros(layer.output.shape)
         self.unit_total_inputs = np.zeros(layer.total_input.shape)
+        self.biases = np.zeros((layer.weights.shape[0], 1, 1))
         self.reset()
 
 class MaxPoolDerivativeCache(DerivativeCache):

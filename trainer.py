@@ -52,7 +52,7 @@ class Trainer:
         for i, layer in enumerate(self.net.layers):
             if not layer.has_weights(): continue
             self.weight_deriv_mats[i] += layer.deriv_cache.weights
-            self.bias_deriv_vecs[i] += layer.deriv_cache.unit_total_inputs
+            self.bias_deriv_vecs[i] += layer.deriv_cache.biases
 
     #at the end of batch, perform update
     def update_weights_and_biases(self, num_of_examples):

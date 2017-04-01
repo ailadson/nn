@@ -38,6 +38,14 @@ class FullyConnectedLayer:
     def back_propagate(self):
         self.deriv_cache.reset()
         self.deriv_wrt_weights()
+        self.deriv_wrt_biases()
+
+    def deriv_wrt_biases(self):
+        if self.deriv_cache.is_set("biases"):
+            return self.deriv_cache.biases
+
+        np.copyto(self.deriv_cache.biases, self.deriv_wrt_unit_total_inputs())
+        return self.deriv_cache.biases
 
     def deriv_wrt_unit_outputs(self):
         return self.next_layer.deriv_wrt_prev_outputs()
