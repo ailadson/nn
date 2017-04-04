@@ -1,5 +1,7 @@
 cimport cython
 cimport numpy as np
+from numpy.math cimport INFINITY
+
 
 ctypedef np.float64_t DTYPE_t
 
@@ -105,29 +107,14 @@ cdef void apply_max_pooling_(
     cdef int channel_idx, i, j
     cdef np.float64_t curr_val, next_val
 
+    des[:, :, :] = -INFINITY
+
     for channel_idx in range(num_channels):
-        # Compare to item in next column.
         for i in range(height):
-            for j in range(width - 1):
-                curr_val = ipt[channel_idx, i, j]
-
-                next_val = ipt[channel_idx, i, j + 1]
-                if next_val > curr_val:
-                    des[channel_idx, i, j] = next_val
-                else:
-                    des[channel_idx, i, j] = curr_val
-
-        # Compare to item in next row.
-        for i in range(height - 1):
             for j in range(width):
-                # Notice that I use des because this is already the
-                # max of looking one right.
-                curr_val = des[channel_idx, i, j]
-                next_val = des[channel_idx, i + 1, j]
-                if next_val > curr_val:
-                    des[channel_idx, i, j] = next_val
-                else:
-                    des[channel_idx, i, j] = curr_val
+                curr_val = ipt[channel_idx, i, j]
+                if curr_val > des[channel_idx, i // 2, j // 2]:
+                    des[channel_idx, i // 2, j // 2] = curr_val
 
 def apply_max_pooling(
     DTYPE_t[:, :, :] ipt,
