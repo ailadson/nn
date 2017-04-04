@@ -1,37 +1,47 @@
+cimport cython
 import numpy as np
 cimport numpy as np
 
-# ctypedef np.ndarray[np.float64_t, ndim=2] np.ndarray[np.float64_t, ndim=2]
-# ctypedef np.float64_t[:] np.ndarray[np.float64_t, ndim=2]
+cdef struct bounds_s:
+    int start_row
+    int end_row
+    int start_col
+    int end_col
 
-def max(int a, int b):
+cdef int max(int a, int b) nogil:
     if a > b:
         return a
     return b
 
-def min(int a, int b):
+cdef int min(int a, int b) nogil:
     if a > b:
         return b
     return a
 
-def get_deconvolve_bounds(np.ndarray[np.float64_t, ndim=2] mat, int offset_row, int offset_col):
+cdef bounds_s get_deconvolve_bounds(
+    np.float64_t[:, :] mat, int offset_row, int offset_col) nogil:
+
     cdef int num_of_rows = mat.shape[0]
     cdef int num_of_cols = mat.shape[1]
-    cdef int start_row = max(offset_row, 0)
-    cdef int end_row = min(offset_row + num_of_rows, num_of_rows)
-    cdef int start_col = max(offset_col, 0)
-    cdef int end_col = min(offset_col + num_of_cols, num_of_cols)
-    return (start_row, end_row, start_col, end_col)
+    cdef bounds_s bounds
 
-def sum_el_prod2d(
-      np.ndarray[np.float64_t, ndim=2] ipt,
-      np.ndarray[np.float64_t, ndim=2] err,
+    bounds.start_row = max(offset_row, 0)
+    bounds.end_row = min(offset_row + num_of_rows, num_of_rows)
+    bounds.start_col = max(offset_col, 0)
+    bounds.end_col = min(offset_col + num_of_cols, num_of_cols)
+
+    return bounds
+
+@cython.boundscheck(False)
+cdef np.float64_t sum_el_prod2d(
+      np.float64_t[:, :] ipt,
+      np.float64_t[:, :] err,
       int ipt_start_row,
       int ipt_start_col,
       int err_start_row,
       int err_start_col,
       int num_rows,
-      int num_cols):
+      int num_cols) nogil:
 
     cdef np.float64_t s = 0
     cdef int i, j
@@ -44,31 +54,43 @@ def sum_el_prod2d(
             s += ipt_el * err_el
     return s
 
+@cython.boundscheck(False)
+cdef void deconvolve2d_(
+        np.float64_t[:, :] ipt,
+        np.float64_t[:, :] error,
+        np.float64_t[:, :] deriv_filter) nogil:
 
-
-def deconvolve2d(np.ndarray[np.float64_t, ndim=2] ipt, np.ndarray[np.float64_t, ndim=2] error, np.ndarray[np.float64_t, ndim=2] deriv_filter):
-    cdef int num_of_rows = len(deriv_filter)
-    cdef int num_of_cols = len(deriv_filter[0])
+    cdef int num_of_rows = deriv_filter.shape[0]
+    cdef int num_of_cols = deriv_filter.shape[1]
     cdef int i, j
     cdef int offset_row, offset_col
-    cdef int ipt_start_row, ipt_end_row, ipt_start_col, ipt_end_col
-    cdef int error_start_row, error_end_row, error_start_col, error_end_col
+    cdef bounds_s ipt_bounds
+    cdef bounds_s error_bounds
 
     for i in range(num_of_rows):
         for j in range(num_of_cols):
-            offset_row = i - num_of_rows // 2
-            offset_col = j - num_of_cols // 2
-            ipt_start_row, ipt_end_row, ipt_start_col, ipt_end_col = (
-                get_deconvolve_bounds(ipt, offset_row, offset_col)
+            offset_row = i - (num_of_rows // 2)
+            offset_col = j - (num_of_cols // 2)
+            ipt_bounds = get_deconvolve_bounds(
+                ipt, offset_row, offset_col
             )
-            error_start_row, error_end_row, error_start_col, error_end_col = (
-                get_deconvolve_bounds(error, -1 * offset_row, -1 * offset_col)
+            error_bounds = get_deconvolve_bounds(
+                error, -1 * offset_row, -1 * offset_col
             )
 
             # += meant for accumulating errors in the deriv filter
             deriv_filter[i, j] += sum_el_prod2d(
                 ipt, error,
-                ipt_start_row, ipt_start_col,
-                error_start_row, error_start_col,
-                ipt_end_row - ipt_start_row,
-                ipt_end_col - ipt_start_col)
+                ipt_bounds.start_row, ipt_bounds.start_col,
+                error_bounds.start_row, error_bounds.start_col,
+                ipt_bounds.end_row - ipt_bounds.start_row,
+                ipt_bounds.end_col - ipt_bounds.start_col
+            )
+
+def deconvolve2d(
+        np.float64_t[:, :] ipt,
+        np.float64_t[:, :] error,
+        np.float64_t[:, :] deriv_filter):
+
+    with nogil:
+        deconvolve2d_(ipt, error, deriv_filter)
