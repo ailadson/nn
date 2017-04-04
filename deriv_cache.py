@@ -19,6 +19,9 @@ class DerivativeCache:
     def is_set(self, name):
         return self.is_set_d[name]
 
+    def set(self, name):
+        self.is_set_d[name] = True
+
     def __str__(self):
         return f"Weights: {self.weights}\nPrev_outputs: {self.prev_outputs}\nunit_total_inputs: {self.unit_total_inputs}"
 

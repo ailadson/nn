@@ -47,12 +47,30 @@ class Trainer:
         misclassification = 1 if list(opt).index( 1 ) != estimated_true_class_idx else 0
         return (loss, misclassification)
 
+    def inner_update_weight_deriv_mats_and_bias_vecs1(self, layer, i):
+        temp_weight_mat = self.weight_deriv_mats[i]
+        temp_weight_mat += layer.deriv_cache.weights
+
+
+    def inner_update_weight_deriv_mats_and_bias_vecs2(self, layer, i):
+        temp_bias_vec = self.bias_deriv_vecs[i]
+        temp_bias_vec += layer.deriv_cache.biases
+
     #accumulate derivative over course of batch
     def update_weight_deriv_mats_and_bias_vecs(self):
         for i, layer in enumerate(self.net.layers):
             if not layer.has_weights(): continue
-            self.weight_deriv_mats[i] += layer.deriv_cache.weights
-            self.bias_deriv_vecs[i] += layer.deriv_cache.biases
+            self.inner_update_weight_deriv_mats_and_bias_vecs1(layer, i)
+            self.inner_update_weight_deriv_mats_and_bias_vecs2(layer, i)
+            # print("self.weights")
+            # print(self.weight_deriv_mats[i].flags.f_contiguous)
+            # print("layer.weights")
+            # print(layer.deriv_cache.weights.flags.f_contiguous)
+            # print("self.biases")
+            # print(self.bias_deriv_vecs[i].flags.f_contiguous)
+            # print("layer.biases")
+            # print(layer.deriv_cache.biases.flags.f_contiguous)
+            # print("-"*88)
 
     #at the end of batch, perform update
     def update_weights_and_biases(self, num_of_examples):

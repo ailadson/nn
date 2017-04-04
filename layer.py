@@ -57,7 +57,7 @@ class FullyConnectedLayer:
         deriv_wrt_unit_total_inputs = self.deriv_wrt_unit_total_inputs()
         t_weights = self.weights.transpose()
         t_weights.dot(deriv_wrt_unit_total_inputs, out = self.deriv_cache.prev_outputs)
-
+        self.deriv_cache.set('prev_outputs')
         return self.deriv_cache.prev_outputs
 
     def deriv_wrt_unit_total_inputs(self):

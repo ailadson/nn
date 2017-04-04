@@ -2,6 +2,7 @@ from scipy.signal import convolve2d as c2d
 import numpy as np
 from functions import *
 from deriv_cache import ConvDerivativeCache
+from deconvolve2d import deconvolve2d
 
 
 class ConvolutionalLayer():
@@ -66,6 +67,7 @@ class ConvolutionalLayer():
                 bp_errors = deriv_wrt_unit_total_inputs[output_layer_idx]
                 deriv_filter = self.deriv_cache.weights[output_layer_idx, input_layer_idx]
                 deconvolve2d(input_layer, bp_errors, deriv_filter)
+        self.deriv_cache.set('weights')
         return self.deriv_cache.weights
 
     def deriv_wrt_unit_total_inputs(self):
@@ -85,6 +87,7 @@ class ConvolutionalLayer():
             return self.deriv_cache.prev_outputs
         self.deriv_cache.prev_outputs *= 0
         self.apply_backwards_convolution(self.deriv_wrt_unit_total_inputs(), self.deriv_cache.prev_outputs)
+        self.deriv_cache.set('prev_outputs')
         return self.deriv_cache.prev_outputs
 
     def apply_backwards_convolution(self, deriv_wrt_total_inputs, deriv_wrt_prev_outputs):
