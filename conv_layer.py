@@ -1,4 +1,5 @@
-from scipy.signal import convolve2d as c2d
+from convolve2d import convolve2d as c2d
+#from scipy.signal import convolve2d as c2d
 import numpy as np
 from functions import *
 from deriv_cache import ConvDerivativeCache
@@ -95,18 +96,18 @@ class ConvolutionalLayer():
             for input_layer_idx in range(self.weights.shape[1]):
                 total_input_layer = deriv_wrt_total_inputs[output_layer_idx]
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
-                deriv_wrt_prev_outputs[input_layer_idx] += c2d(total_input_layer, kernel_weights, mode="same")
+                # TODO: Should we pad in case of even sized kernel?
+                kernel_weights = np.fliplr(np.flipud(kernel_weights))
+                c2d(total_input_layer,
+                    kernel_weights,
+                    deriv_wrt_prev_outputs[input_layer_idx])
 
     def apply_convolution(self, ipt, des):
         for output_layer_idx in range(self.weights.shape[0]):
             for input_layer_idx in range(self.weights.shape[1]):
                 input_layer = ipt[input_layer_idx]
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
-                # TODO: c2d flips the kernel. I'm not sure whether we
-                # should be padding here.
-                kernel_weights = np.fliplr(np.flipud(kernel_weights))
-                #kernel_weights = pad_flipped_weights(kernel_weights)
-                des[output_layer_idx] += c2d(input_layer, kernel_weights, mode="same")
+                c2d(input_layer, kernel_weights, des[output_layer_idx])
 
     def pad_flipped_weights(weights):
         height, width = weights.shape
