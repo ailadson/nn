@@ -62,17 +62,17 @@ cdef void deconvolve2d_(
         np.float64_t[:, :] error,
         np.float64_t[:, :] deriv_filter) nogil:
 
-    cdef int num_of_rows = deriv_filter.shape[0]
-    cdef int num_of_cols = deriv_filter.shape[1]
+    cdef int krows = deriv_filter.shape[0]
+    cdef int kcols = deriv_filter.shape[1]
     cdef int i, j
     cdef int offset_row, offset_col
     cdef bounds_s ipt_bounds
     cdef bounds_s error_bounds
 
-    for i in range(num_of_rows):
-        for j in range(num_of_cols):
-            offset_row = i - (num_of_rows // 2)
-            offset_col = j - (num_of_cols // 2)
+    for i in range(krows):
+        for j in range(kcols):
+            offset_row = i - (krows // 2)
+            offset_col = j - (kcols // 2)
             ipt_bounds = get_deconvolve_bounds(
                 ipt, offset_row, offset_col
             )
