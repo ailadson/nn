@@ -51,5 +51,4 @@ def convolve2d(
     np.float64_t[:, :] kernel,
     np.float64_t[:, :] target):
 
-    with nogil:
-        convolve2d_(ipt, kernel, target)
+    convolve2d_(ipt, kernel, target)

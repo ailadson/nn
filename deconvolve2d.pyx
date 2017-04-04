@@ -94,5 +94,4 @@ def deconvolve2d(
         np.float64_t[:, :] error,
         np.float64_t[:, :] deriv_filter):
 
-    with nogil:
-        deconvolve2d_(ipt, error, deriv_filter)
+    deconvolve2d_(ipt, error, deriv_filter)

@@ -25,14 +25,13 @@ cdef void back_propagate_channels_(
 
     cdef int num_of_channels = prev_channels.shape[0]
     cdef int i
-    with nogil:
-        for i in range(num_of_channels):
-            back_propagate_channel(
-                i,
-                deriv_wrt_prev_outputs,
-                prev_channels,
-                deriv_wrt_unit_outputs
-            )
+    for i in range(num_of_channels):
+        back_propagate_channel(
+            i,
+            deriv_wrt_prev_outputs,
+            prev_channels,
+            deriv_wrt_unit_outputs
+        )
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -133,5 +132,5 @@ cdef void apply_max_pooling_(
 def apply_max_pooling(
     DTYPE_t[:, :, :] ipt,
     DTYPE_t[:, :, :] des):
-    with nogil:
-        apply_max_pooling_(ipt, des)
+
+    apply_max_pooling_(ipt, des)
