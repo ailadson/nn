@@ -85,7 +85,7 @@ class MaxPoolingLayer():
 
 
     def apply_pooling(self, ipt, des):
-        np.copyto(des, skimage.measure.block_reduce(ipt, (1,2,2), np.max))
+        apply_max_pooling(ipt, des)
 
     def has_weights(self):
         return False

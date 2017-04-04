@@ -91,3 +91,43 @@ cdef void get_local_max_and_pos(
     perform(good_j, channels, channel_idx, i, j + 1, max_pair, &max_val)
     perform(good_i, channels, channel_idx, i + 1, j, max_pair, &max_val)
     perform(good_i & good_j, channels, channel_idx, i + 1, j + 1, max_pair, &max_val)
+
+@cython.boundscheck(False)
+cdef void apply_max_pooling_(
+    DTYPE_t[:, :, :] ipt,
+    DTYPE_t[:, :, :] des) nogil:
+    cdef int num_channels = ipt.shape[0]
+    cdef int height = ipt.shape[1]
+    cdef int width = ipt.shape[2]
+    cdef int channel_idx, i, j
+    cdef np.float64_t curr_val, next_val
+
+    for channel_idx in range(num_channels):
+        # Compare to item in next column.
+        for i in range(height):
+            for j in range(width - 1):
+                curr_val = ipt[channel_idx, i, j]
+
+                next_val = ipt[channel_idx, i, j + 1]
+                if next_val > curr_val:
+                    des[channel_idx, i, j] = next_val
+                else:
+                    des[channel_idx, i, j] = curr_val
+
+        # Compare to item in next row.
+        for i in range(height - 1):
+            for j in range(width):
+                # Notice that I use des because this is already the
+                # max of looking one right.
+                curr_val = des[channel_idx, i, j]
+                next_val = des[channel_idx, i + 1, j]
+                if next_val > curr_val:
+                    des[channel_idx, i, j] = next_val
+                else:
+                    des[channel_idx, i, j] = curr_val
+
+def apply_max_pooling(
+    DTYPE_t[:, :, :] ipt,
+    DTYPE_t[:, :, :] des):
+    with nogil:
+        apply_max_pooling_(ipt, des)
