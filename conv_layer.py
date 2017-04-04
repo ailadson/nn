@@ -97,16 +97,15 @@ class ConvolutionalLayer():
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
                 deriv_wrt_prev_outputs[input_layer_idx] += c2d(total_input_layer, kernel_weights, mode="same")
 
-    def apply_convolution(self, ipt, des, flip = False):
+    def apply_convolution(self, ipt, des):
         for output_layer_idx in range(self.weights.shape[0]):
             for input_layer_idx in range(self.weights.shape[1]):
                 input_layer = ipt[input_layer_idx]
                 kernel_weights = self.weights[output_layer_idx, input_layer_idx]
                 # TODO: c2d flips the kernel. I'm not sure whether we
                 # should be padding here.
-                if not flip:
-                    kernel_weights = np.fliplr(np.flipud(kernel_weights))
-                    #kernel_weights = pad_flipped_weights(kernel_weights)
+                kernel_weights = np.fliplr(np.flipud(kernel_weights))
+                #kernel_weights = pad_flipped_weights(kernel_weights)
                 des[output_layer_idx] += c2d(input_layer, kernel_weights, mode="same")
 
     def pad_flipped_weights(weights):
