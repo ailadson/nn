@@ -35,6 +35,7 @@ cdef void back_propagate_channels_(
             )
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void back_propagate_channel(
     int channel_idx,
     DTYPE_t[:, :, :] deriv_wrt_prev_outputs,
@@ -55,6 +56,7 @@ cdef void back_propagate_channel(
             )
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void perform(
     int good,
     DTYPE_t[:, :, :] channels,
@@ -72,6 +74,7 @@ cdef void perform(
 # One fn.
 # Looks at each sell as in getpoolingvalues. Keeps track of max seen so far and its pos.
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void get_local_max_and_pos(
     int channel_idx,
     DTYPE_t[:, :, :] channels,
@@ -93,6 +96,7 @@ cdef void get_local_max_and_pos(
     perform(good_i & good_j, channels, channel_idx, i + 1, j + 1, max_pair, &max_val)
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void apply_max_pooling_(
     DTYPE_t[:, :, :] ipt,
     DTYPE_t[:, :, :] des) nogil:

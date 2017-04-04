@@ -33,6 +33,7 @@ cdef bounds_s get_deconvolve_bounds(
     return bounds
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef np.float64_t sum_el_prod2d(
       np.float64_t[:, :] ipt,
       np.float64_t[:, :] err,
@@ -55,6 +56,7 @@ cdef np.float64_t sum_el_prod2d(
     return s
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void deconvolve2d_(
         np.float64_t[:, :] ipt,
         np.float64_t[:, :] error,

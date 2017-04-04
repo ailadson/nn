@@ -2,6 +2,7 @@ cimport cython
 cimport numpy as np
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void convolve_step(
     np.float64_t[:, :] ipt,
     np.float64_t[:, :] target,
@@ -27,6 +28,7 @@ cdef void convolve_step(
             target[i, j] += ipt[i2, j2] * kval
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void convolve2d_(
     np.float64_t[:, :] ipt,
     np.float64_t[:, :] kernel,
