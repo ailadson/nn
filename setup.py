@@ -1,13 +1,19 @@
-from distutils.core import setup
+from distutils.core import setup, Extension
 from Cython.Build import cythonize
 import numpy
 
+def extension(name):
+    return Extension(
+        name, [f"{name}.pyx"],
+        include_dirs = [numpy.get_include()],
+    )
+
 setup(
     ext_modules=cythonize([
-        "deconvolve2d.pyx",
-        "max_pooling_functions.pyx",
-        "convolve2d.pyx",
-    ]), include_dirs=[numpy.get_include()]
+        extension("deconvolve2d"),
+        extension("max_pooling_functions"),
+        extension("convolve2d"),
+    ])
 )
 
 # python setup.py build_ext --inplace
