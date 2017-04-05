@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -8,9 +9,9 @@ float* kernel;
 float* des;
 
 #define KSIZE 3
-#define WIDTH 28
-#define HEIGHT 28
-#define ITERS 100000
+#define WIDTH 512
+#define HEIGHT 512
+#define ITERS 1
 
 typedef struct {
   int width;
@@ -30,9 +31,9 @@ int main() {
   printf("Number of bytes in float: %ld\n", sizeof(float));
   ipt = malloc(WIDTH * HEIGHT * sizeof(float));
   des = malloc(WIDTH * HEIGHT * sizeof(float));
-  kernel = malloc(KSIZE * KSIZE * sizeof(float));
+  kernel = malloc(KSIZE * 1 * sizeof(float));
 
-  shape kernel_s = { .width = KSIZE, .height = KSIZE };
+  shape kernel_s = { .width = KSIZE, .height = 1 };
   shape image_s = { .width = WIDTH, .height = HEIGHT };
 
   long t = clock();
@@ -128,9 +129,9 @@ void convolve1d(
 
   assert(kernel_width == 3);
 
-  float k0[8] = { [0...7] = kernel[0] };
-  float k1[8] = { [0...7] = kernel[1] };
-  float k2[8] = { [0...7] = kernel[2] };
+  float k0[8] = { [0 ... 7] = kernel[0] };
+  float k1[8] = { [0 ... 7] = kernel[1] };
+  float k2[8] = { [0 ... 7] = kernel[2] };
 
   __m256 k_buff0 = _mm256_loadu_ps(k0);
   __m256 k_buff1 = _mm256_loadu_ps(k1);
@@ -151,7 +152,7 @@ void convolve1d(
 
   for (size_t i = 0; i < image_s.height; i++) {
     for (size_t j = 0; j < image_s.width; j += 8) {
-      data_buff = _mm256_loadu_ps(ipt[i * image_s.width + j]);
+      data_buff = _mm256_loadu_ps(ipt + (i * image_s.width) + j);
       prod_buff0 = _mm256_mul_ps(k_buff0, data_buff);
       prod_buff1 = _mm256_mul_ps(k_buff1, data_buff);
       prod_buff2 = _mm256_mul_ps(k_buff2, data_buff);
