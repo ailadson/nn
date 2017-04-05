@@ -6,10 +6,10 @@ typedef struct {
   size_t width;
 } shape_t;
 
-#define HEIGHT 24
-#define WIDTH 24
+#define HEIGHT 28
+#define WIDTH 28
 #define KSIZE 3
-#define ITERS 1
+#define ITERS 100000
 
 float mat_get(float* matrix, shape_t shape, size_t i, size_t j);
 void mat_set(float* matrix, shape_t shape, size_t i, size_t j, float val);

@@ -13,8 +13,6 @@ void convolve1d(float* input,
                 size_t kernel_row_offset) {
   assert(kernel_width == 3);
 
-  assert(image_shape.width % 8 == 0);
-
   float k0_arr[8] = { [0 ... 7] = kernel[0] };
   float k1_arr[8] = { [0 ... 7] = kernel[1] };
   float k2_arr[8] = { [0 ... 7] = kernel[2] };
@@ -42,6 +40,8 @@ void convolve1d(float* input,
   __m256 prod1_avx;
   __m256 prod2_avx;
 
+  float scratch_space[8];
+
   for (size_t i = 0; i < image_shape.height; i++) {
     // Notice that we *subtract* the kernel_row_offset. This is
     // correct.
@@ -51,7 +51,18 @@ void convolve1d(float* input,
     }
 
     for (size_t j = 0; j < image_shape.width; j += 8) {
-      data_avx = _mm256_loadu_ps(mat_offset(input, image_shape, i, j));
+      float* read_addr = mat_offset(input, image_shape, i, j);
+
+      if (j + 7 >= image_shape.width) {
+        read_addr = scratch_space;
+        size_t num_elements_left = image_shape.width - j;
+        size_t num_bytes_left = num_elements_left * sizeof(float);
+        size_t num_bytes_to_zero = 8 * sizeof(float) - num_bytes_left;
+        memcpy(read_addr, mat_offset(input, image_shape, i, j), num_bytes_left);
+        memset(read_addr + num_elements_left, 0, num_bytes_to_zero);
+      }
+
+      data_avx = _mm256_loadu_ps(read_addr);
       prod0_avx = _mm256_mul_ps(k0_avx, data_avx);
       prod1_avx = _mm256_mul_ps(k1_avx, data_avx);
       prod2_avx = _mm256_mul_ps(k2_avx, data_avx);
@@ -69,7 +80,16 @@ void convolve1d(float* input,
       result_avx = _mm256_add_ps(result_avx, prod1_avx);
       result_avx = _mm256_add_ps(result_avx, prod2_avx);
 
-      _mm256_storeu_ps(destination_addr, result_avx);
+
+      if (j + 7 < image_shape.width) {
+        _mm256_storeu_ps(destination_addr, result_avx);
+      } else {
+        _mm256_storeu_ps(scratch_space, result_avx);
+
+        size_t num_elements_left = image_shape.width - j;
+        size_t num_bytes_left = num_elements_left * sizeof(float);
+        memcpy(destination_addr, scratch_space, num_bytes_left);
+      }
 
       // Don't forget the folks at the ends!
       if (j > 0) {
@@ -109,7 +129,7 @@ int main() {
   float* kernel = build_example_kernel(kernel_shape);
 
   printf("Input matrix!\n");
-  print_matrix(input, image_shape);
+  print_matrix_corners(input, image_shape);
   printf("Kernel matrix!\n");
   print_matrix(kernel, kernel_shape);
 
@@ -124,7 +144,7 @@ int main() {
   t = clock() - t;
 
   printf("Result matrix!\n");
-  print_matrix(destination, image_shape);
+  print_matrix_corners(destination, image_shape);
 
   printf("time: %f\n", (double) t / CLOCKS_PER_SEC);
 
