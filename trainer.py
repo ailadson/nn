@@ -42,7 +42,8 @@ class Trainer:
         output = self.net.forward_propagate(ipt)
         self.net.back_propagate(opt)
         self.update_weight_deriv_mats_and_bias_vecs()
-        loss = cross_entropy(output, list(opt).index(1))
+        # loss = cross_entropy(output, list(opt).index(1))
+        loss = 0.0
         estimated_true_class_idx = list(output).index( max(output) )
         misclassification = 1 if list(opt).index( 1 ) != estimated_true_class_idx else 0
         return (loss, misclassification)
