@@ -109,7 +109,7 @@ int main() {
   float* kernel = build_example_kernel(kernel_shape);
 
   printf("Input matrix!\n");
-  print_matrix_corners(input, image_shape);
+  print_matrix(input, image_shape);
   printf("Kernel matrix!\n");
   print_matrix(kernel, kernel_shape);
 
@@ -124,7 +124,7 @@ int main() {
   t = clock() - t;
 
   printf("Result matrix!\n");
-  print_matrix_corners(destination, image_shape);
+  print_matrix(destination, image_shape);
 
   printf("time: %f\n", (double) t / CLOCKS_PER_SEC);
 
