@@ -23,14 +23,16 @@ void convolve1d(float* input,
 
   // Hack to get a float of ones.
   int neg_one = 0xffffffff;
+  int zero = 0x00;
   float ones_float = *((float*) (&neg_one));
+  float zeros_float = *((float*) (&zero));
 
   __m256i right_shift_avx = _mm256_set_epi32(6, 5, 4, 3, 2, 1, 0, 0);
-  float drop_left_el_arr[] = { 0x0000, [1 ... 7] = ones_float };
+  float drop_left_el_arr[] = { zeros_float, [1 ... 7] = ones_float };
   __m256 drop_left_el_avx = _mm256_loadu_ps(drop_left_el_arr);
 
   __m256i left_shift_avx = _mm256_set_epi32(7, 7, 6, 5, 4, 3, 2, 1);
-  float drop_right_el_arr[] = { [0 ... 6] = ones_float, 0x00 };
+  float drop_right_el_arr[] = { [0 ... 6] = ones_float, zeros_float };
   __m256 drop_right_el_avx = _mm256_loadu_ps(drop_right_el_arr);
 
   __m256 data_avx;
