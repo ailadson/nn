@@ -40,7 +40,9 @@ void convolve1d(float* input,
   __m256 prod2_avx;
 
   for (int i = 0; i < image_shape.height; i++) {
-    int destination_row_idx = i + kernel_row_offset;
+    // Notice that we *subtract* the kernel_row_offset. This is
+    // correct.
+    int destination_row_idx = i - kernel_row_offset;
     if (!row_in_bounds(image_shape, destination_row_idx)) {
       continue;
     }
@@ -81,7 +83,7 @@ void convolve2d(float* input,
   for (int i = 0; i < kernel_shape.height; i++) {
     int kernel_row_offset = i - mid_i;
     convolve1d(input,
-               kernel,
+               mat_offset(kernel, kernel_shape, i, 0),
                destination,
                image_shape,
                kernel_shape.width,
