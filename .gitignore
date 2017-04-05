@@ -3,5 +3,8 @@ __pycache__
 MNIST_data
 *.so
 build
-*.c
+convolve2d.c
+deconvolve2d.c
+max_pooling_functions.c
+avxtest.c
 *.prof
