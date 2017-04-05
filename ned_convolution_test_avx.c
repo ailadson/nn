@@ -61,9 +61,6 @@ void convolve1d(float* input,
       prod2_avx = _mm256_permutevar8x32_ps(prod2_avx, left_shift_avx);
       prod2_avx = _mm256_and_ps(prod2_avx, drop_right_el_avx);
 
-      // TODO: need to add left and right ends of the 8float
-      // array... Argh!
-
       float* destination_addr = \
         mat_offset(destination, image_shape, destination_row_idx, j);
       result_avx = _mm256_loadu_ps(destination_addr);
@@ -73,6 +70,16 @@ void convolve1d(float* input,
       result_avx = _mm256_add_ps(result_avx, prod2_avx);
 
       _mm256_storeu_ps(destination_addr, result_avx);
+
+      // Don't forget the folks at the ends!
+      if (j > 0) {
+        destination_addr[0] += \
+          kernel[0] * mat_get(input, image_shape, i, j - 1);
+      }
+      if ((j+7) < (image_shape.width - 1)) {
+        destination_addr[7] += \
+          kernel[2] * mat_get(input, image_shape, i, j + 8);
+      }
     }
   }
 }
