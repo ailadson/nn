@@ -20,7 +20,7 @@ float sum_of_pixels(float* image, shape_t image_s);
 
 int main() {
   printf("Number of bytes in float: %ld\n", sizeof(float));
-  shape_t kernel_s = { .width = KSIZE, .height = 1 };
+  shape_t kernel_s = { .width = KSIZE, .height = KSIZE };
   shape_t image_s = { .width = WIDTH, .height = HEIGHT };
 
   ipt = build_example_input(image_s);

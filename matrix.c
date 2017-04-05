@@ -38,12 +38,20 @@ float* build_example_input(shape_t image_shape) {
 float* build_example_kernel(shape_t kernel_shape) {
   float* kernel = allocate_matrix(kernel_shape);
 
-  assert(kernel_shape.height == 1);
+  assert(kernel_shape.height == 3);
   assert(kernel_shape.width == 3);
 
-  mat_set(kernel, kernel_shape, 0, 0, 1.0);
-  mat_set(kernel, kernel_shape, 0, 1, 0.0);
-  mat_set(kernel, kernel_shape, 0, 2, 1.0);
+  for (int i = 0; i < kernel_shape.height; i++) {
+    for (int j = 0; j < kernel_shape.width; j++) {
+      float val = 0.0;
+      if ((i == 0) || (i == kernel_shape.height - 1)) {
+        val = 1.0;
+      } else if ((j == 0) || (j == kernel_shape.width - 1)) {
+        val = 1.0;
+      }
+      mat_set(kernel, kernel_shape, i, j, val);
+    }
+  }
 
   return kernel;
 }

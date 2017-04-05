@@ -93,8 +93,7 @@ int main() {
   shape_t image_shape = { .height = HEIGHT, .width = WIDTH };
   float* input = build_example_input(image_shape);
   float* destination = allocate_matrix(image_shape);
-  // TODO: later implement for 2d kernel.
-  shape_t kernel_shape = { .height = 1, .width = KSIZE };
+  shape_t kernel_shape = { .height = KSIZE, .width = KSIZE };
   float* kernel = build_example_kernel(kernel_shape);
 
   printf("Input matrix!\n");
