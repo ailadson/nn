@@ -92,7 +92,7 @@ void convolve_step(
       }
 
       *mat_offset(target, image_s, i, j) += \
-        mat_get(ipt, image_s, i2, j2) * kernel_val;
+        (mat_get(ipt, image_s, i2, j2) * kernel_val);
     }
   }
 }
