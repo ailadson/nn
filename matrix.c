@@ -65,3 +65,7 @@ void print_matrix_corners(float* mat, shape_t shape) {
   printf("%6.2f ", mat_get(mat, shape, shape.height - 1, shape.width - 1));
   printf("\n");
 }
+
+bool row_in_bounds(shape_t shape, int row_idx) {
+  return ((row_idx >= 0) && (row_idx < shape.height));
+}
