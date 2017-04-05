@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "matrix.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -8,53 +9,32 @@ float* ipt;
 float* kernel;
 float* des;
 
-#define KSIZE 3
-#define WIDTH 512
-#define HEIGHT 512
-#define ITERS 1
-
-typedef struct {
-  int width;
-  int height;
-} shape;
-
 void convolve2d(
   float* ipt,
   float* kernel,
   float* target,
-  shape kernel_s,
-  shape image_s);
+  shape_t kernel_s,
+  shape_t image_s);
 
-float sum_of_pixels(float* image, shape image_s);
+float sum_of_pixels(float* image, shape_t image_s);
 
 int main() {
   printf("Number of bytes in float: %ld\n", sizeof(float));
-  ipt = malloc(WIDTH * HEIGHT * sizeof(float));
-  des = malloc(WIDTH * HEIGHT * sizeof(float));
-  kernel = malloc(KSIZE * 1 * sizeof(float));
+  shape_t kernel_s = { .width = KSIZE, .height = 1 };
+  shape_t image_s = { .width = WIDTH, .height = HEIGHT };
 
-  shape kernel_s = { .width = KSIZE, .height = 1 };
-  shape image_s = { .width = WIDTH, .height = HEIGHT };
+  ipt = build_example_input(image_s);
+  des = allocate_matrix(image_s);
+  kernel = build_example_kernel(kernel_s);
 
   long t = clock();
   for (size_t i = 0; i < ITERS; i++) {
     convolve2d(ipt, kernel, des, kernel_s, image_s);
+    print_matrix_corners(des, image_s);
   }
   t = clock() - t;
 
-  float sum = sum_of_pixels(des, image_s);
-  printf("sum: %f\n", sum);
   printf("time: %f\n", (double) t / CLOCKS_PER_SEC);
-}
-
-float sum_of_pixels(float* image, shape image_s) {
-  float result = 0;
-  for (size_t i = 0; i < image_s.height; i++) {
-    for (size_t j = 0; j < image_s.width; j++) {
-      result += image[i * image_s.width + j];
-    }
-  }
-  return result;
 }
 
 void convolve_step(
@@ -63,14 +43,14 @@ void convolve_step(
   float kernel_val,
   int kernel_offset_i,
   int kernel_offset_j,
-  shape image_s);
+  shape_t image_s);
 
 void convolve2d(
   float* ipt,
   float* kernel,
   float* target,
-  shape kernel_s,
-  shape image_s) {
+  shape_t kernel_s,
+  shape_t image_s) {
 
   int mid_i = kernel_s.height / 2;
   int mid_j = kernel_s.width / 2;
@@ -80,7 +60,7 @@ void convolve2d(
       convolve_step(
         ipt,
         target,
-        kernel[i * kernel_s.width + j],
+        mat_get(kernel, kernel_s, i, j),
         i - mid_i,
         j - mid_j,
         image_s
@@ -95,36 +75,34 @@ void convolve_step(
   float kernel_val,
   int kernel_offset_i,
   int kernel_offset_j,
-  shape image_s) {
-
-  __m256 ymm0, ymm1;
+  shape_t image_s) {
 
   for (size_t i = 0; i < image_s.height; i++) {
     int i2 = i + kernel_offset_i;
 
-    if ((i2 < 0) || (i2 > image_s.height)) {
+    if ((i2 < 0) || (i2 >= image_s.height)) {
       continue;
     }
 
     for (size_t j = 0; j < image_s.width; j++) {
       int j2 = j + kernel_offset_j;
 
-      if ((j2 < 0) || (j2 > image_s.width)) {
+      if ((j2 < 0) || (j2 >= image_s.width)) {
         continue;
       }
 
-      target[i * image_s.width + j] += (
-        ipt[i2 * image_s.width + j2] * kernel_val
-      );
+      *mat_offset(target, image_s, i, j) += \
+        mat_get(ipt, image_s, i2, j2) * kernel_val;
     }
   }
 }
 
+// In progress!
 void convolve1d(
   float* ipt,
   float* kernel,
   float* des,
-  shape image_s,
+  shape_t image_s,
   int kernel_width) {
 
   assert(kernel_width == 3);
@@ -161,5 +139,4 @@ void convolve1d(
       prod_buff2 = _mm256_permutevar8x32_ps(prod_buff2, left_shift_buff);
     }
   }
-
 }

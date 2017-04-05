@@ -9,3 +9,7 @@ max_pooling_functions.c
 avxtest.c
 *.prof
 a.out
+
+# other executable files
+convolution
+ned_convolution_test_avx
