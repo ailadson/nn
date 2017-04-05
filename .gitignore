@@ -8,3 +8,4 @@ deconvolve2d.c
 max_pooling_functions.c
 avxtest.c
 *.prof
+a.out
