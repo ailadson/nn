@@ -6,7 +6,7 @@ typedef struct {
 #define HEIGHT 512
 #define WIDTH 512
 #define KSIZE 3
-#define ITERS 1
+#define ITERS 1000
 
 float mat_get(float* matrix, shape_t shape, int i, int j);
 void mat_set(float* matrix, shape_t shape, int i, int j, float val);

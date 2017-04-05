@@ -30,9 +30,9 @@ int main() {
   long t = clock();
   for (size_t i = 0; i < ITERS; i++) {
     convolve2d(ipt, kernel, des, kernel_s, image_s);
-    print_matrix_corners(des, image_s);
   }
   t = clock() - t;
+  print_matrix_corners(des, image_s);
 
   printf("time: %f\n", (double) t / CLOCKS_PER_SEC);
 }

@@ -2,6 +2,7 @@
 #include <immintrin.h>
 #include "matrix.h"
 #include <stdio.h>
+#include <time.h>
 
 void convolve1d(float* input,
                 float* kernel,
@@ -11,6 +12,8 @@ void convolve1d(float* input,
 
   assert(kernel_shape.height == 1);
   assert(kernel_shape.width == 3);
+
+  assert(image_shape.width % 8 == 0);
 
   float k0_arr[8] = { [0 ... 7] = mat_get(kernel, kernel_shape, 0, 0) };
   float k1_arr[8] = { [0 ... 7] = mat_get(kernel, kernel_shape, 0, 1) };
@@ -71,9 +74,16 @@ int main() {
   printf("Kernel matrix!\n");
   print_matrix(kernel, kernel_shape);
 
-  convolve1d(input, kernel, destination, image_shape, kernel_shape);
+  long t = clock();
+  for (size_t i = 0; i < ITERS; i++) {
+    convolve1d(input, kernel, destination, image_shape, kernel_shape);
+  }
+  t = clock() - t;
+
   printf("Result matrix!\n");
   print_matrix_corners(destination, image_shape);
+
+  printf("time: %f\n", (double) t / CLOCKS_PER_SEC);
 
   return 0;
 }
