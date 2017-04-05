@@ -2,14 +2,15 @@
 #include <immintrin.h>
 #include "matrix.h"
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 void convolve1d(float* input,
                 float* kernel,
                 float* destination,
                 shape_t image_shape,
-                int kernel_width,
-                int kernel_row_offset) {
+                size_t kernel_width,
+                size_t kernel_row_offset) {
   assert(kernel_width == 3);
 
   assert(image_shape.width % 8 == 0);
@@ -21,11 +22,11 @@ void convolve1d(float* input,
   __m256 k1_avx = _mm256_loadu_ps(k1_arr);
   __m256 k2_avx = _mm256_loadu_ps(k2_arr);
 
-  // Hack to get a float of ones.
-  int neg_one = 0xffffffff;
-  int zero = 0x00;
-  float ones_float = *((float*) (&neg_one));
-  float zeros_float = *((float*) (&zero));
+  // Hack to get a float of zeros and a float of ones.
+  float zeros_float;
+  float ones_float;
+  memset((char*) &zeros_float, 0, sizeof(float));
+  memset((char*) &ones_float, 0xffffffff, sizeof(float));
 
   __m256i right_shift_avx = _mm256_set_epi32(6, 5, 4, 3, 2, 1, 0, 0);
   float drop_left_el_arr[] = { zeros_float, [1 ... 7] = ones_float };
@@ -41,15 +42,15 @@ void convolve1d(float* input,
   __m256 prod1_avx;
   __m256 prod2_avx;
 
-  for (int i = 0; i < image_shape.height; i++) {
+  for (size_t i = 0; i < image_shape.height; i++) {
     // Notice that we *subtract* the kernel_row_offset. This is
     // correct.
-    int destination_row_idx = i - kernel_row_offset;
+    size_t destination_row_idx = i - kernel_row_offset;
     if (!row_in_bounds(image_shape, destination_row_idx)) {
       continue;
     }
 
-    for (int j = 0; j < image_shape.width; j += 8) {
+    for (size_t j = 0; j < image_shape.width; j += 8) {
       data_avx = _mm256_loadu_ps(mat_offset(input, image_shape, i, j));
       prod0_avx = _mm256_mul_ps(k0_avx, data_avx);
       prod1_avx = _mm256_mul_ps(k1_avx, data_avx);
@@ -81,9 +82,9 @@ void convolve2d(float* input,
                 float* destination,
                 shape_t image_shape,
                 shape_t kernel_shape) {
-  int mid_i = kernel_shape.height / 2;
-  for (int i = 0; i < kernel_shape.height; i++) {
-    int kernel_row_offset = i - mid_i;
+  size_t mid_i = kernel_shape.height / 2;
+  for (size_t i = 0; i < kernel_shape.height; i++) {
+    size_t kernel_row_offset = i - mid_i;
     convolve1d(input,
                mat_offset(kernel, kernel_shape, i, 0),
                destination,

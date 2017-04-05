@@ -41,8 +41,8 @@ void convolve_step(
   float* ipt,
   float* target,
   float kernel_val,
-  int kernel_offset_i,
-  int kernel_offset_j,
+  size_t kernel_offset_i,
+  size_t kernel_offset_j,
   shape_t image_s);
 
 void convolve2d(
@@ -52,8 +52,8 @@ void convolve2d(
   shape_t kernel_s,
   shape_t image_s) {
 
-  int mid_i = kernel_s.height / 2;
-  int mid_j = kernel_s.width / 2;
+  size_t mid_i = kernel_s.height / 2;
+  size_t mid_j = kernel_s.width / 2;
 
   for (size_t i = 0; i < kernel_s.height; i++) {
     for (size_t j = 0; j < kernel_s.width; j++) {
@@ -73,21 +73,21 @@ void convolve_step(
   float* ipt,
   float* target,
   float kernel_val,
-  int kernel_offset_i,
-  int kernel_offset_j,
+  size_t kernel_offset_i,
+  size_t kernel_offset_j,
   shape_t image_s) {
 
   for (size_t i = 0; i < image_s.height; i++) {
-    int i2 = i + kernel_offset_i;
+    size_t i2 = i + kernel_offset_i;
 
-    if ((i2 < 0) || (i2 >= image_s.height)) {
+    if (!row_in_bounds(image_s, i2)) {
       continue;
     }
 
     for (size_t j = 0; j < image_s.width; j++) {
-      int j2 = j + kernel_offset_j;
+      size_t j2 = j + kernel_offset_j;
 
-      if ((j2 < 0) || (j2 >= image_s.width)) {
+      if (!col_in_bounds(image_s, j2)) {
         continue;
       }
 
@@ -98,12 +98,13 @@ void convolve_step(
 }
 
 // In progress!
+/*
 void convolve1d(
   float* ipt,
   float* kernel,
   float* des,
   shape_t image_s,
-  int kernel_width) {
+  size_t kernel_width) {
 
   assert(kernel_width == 3);
 
@@ -140,3 +141,4 @@ void convolve1d(
     }
   }
 }
+*/
