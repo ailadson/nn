@@ -10,7 +10,7 @@ def extension(name):
 
 setup(
     ext_modules=cythonize([
-        Extension("main", ["main.pyx"])
+        extension("main")
     ])
 )
 
