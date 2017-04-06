@@ -40,7 +40,16 @@ void convolve1d(float* input,
   __m256 prod1_avx;
   __m256 prod2_avx;
 
-  float scratch_space[8];
+  // This approach avoids memcpy/memset and does AVX masking. But it
+  // relies on you having allocated memory in blocks of
+  // 8*sizeof(float), because it does slip over the array a little
+  // bit.
+  float mask_row_overhang_arr[8];
+  memset((char*) mask_row_overhang_arr, 0x00, 8 * sizeof(float));
+  memset((char*) mask_row_overhang_arr,
+         0xffffffff,
+         (image_shape.width % kernel_width) * sizeof(float));
+  __m256 mask_row_overhang_avx = _mm256_loadu_ps(mask_row_overhang_arr);
 
   for (size_t i = 0; i < image_shape.height; i++) {
     // Notice that we *subtract* the kernel_row_offset. This is
@@ -53,16 +62,11 @@ void convolve1d(float* input,
     for (size_t j = 0; j < image_shape.width; j += 8) {
       float* read_addr = mat_offset(input, image_shape, i, j);
 
-      if (j + 7 >= image_shape.width) {
-        read_addr = scratch_space;
-        size_t num_elements_left = image_shape.width - j;
-        size_t num_bytes_left = num_elements_left * sizeof(float);
-        size_t num_bytes_to_zero = 8 * sizeof(float) - num_bytes_left;
-        memcpy(read_addr, mat_offset(input, image_shape, i, j), num_bytes_left);
-        memset(read_addr + num_elements_left, 0, num_bytes_to_zero);
+      data_avx = _mm256_loadu_ps(read_addr);
+      if ((j + 7) >= image_shape.width) {
+        data_avx = _mm256_and_ps(data_avx, mask_row_overhang_avx);
       }
 
-      data_avx = _mm256_loadu_ps(read_addr);
       prod0_avx = _mm256_mul_ps(k0_avx, data_avx);
       prod1_avx = _mm256_mul_ps(k1_avx, data_avx);
       prod2_avx = _mm256_mul_ps(k2_avx, data_avx);
@@ -72,24 +76,18 @@ void convolve1d(float* input,
       prod2_avx = _mm256_permutevar8x32_ps(prod2_avx, left_shift_avx);
       prod2_avx = _mm256_and_ps(prod2_avx, drop_right_el_avx);
 
+      result_avx = _mm256_add_ps(prod0_avx, prod1_avx);
+      result_avx = _mm256_add_ps(result_avx, prod2_avx);
+      if ((j + 7) >= image_shape.width) {
+        result_avx = _mm256_and_ps(result_avx, mask_row_overhang_avx);
+      }
+
+      // Now load the destination and increment.
       float* destination_addr = \
         mat_offset(destination, image_shape, destination_row_idx, j);
-      result_avx = _mm256_loadu_ps(destination_addr);
-
-      result_avx = _mm256_add_ps(result_avx, prod0_avx);
-      result_avx = _mm256_add_ps(result_avx, prod1_avx);
-      result_avx = _mm256_add_ps(result_avx, prod2_avx);
-
-
-      if (j + 7 < image_shape.width) {
-        _mm256_storeu_ps(destination_addr, result_avx);
-      } else {
-        _mm256_storeu_ps(scratch_space, result_avx);
-
-        size_t num_elements_left = image_shape.width - j;
-        size_t num_bytes_left = num_elements_left * sizeof(float);
-        memcpy(destination_addr, scratch_space, num_bytes_left);
-      }
+      __m256 destination_avx = _mm256_loadu_ps(destination_addr);
+      result_avx = _mm256_add_ps(result_avx, destination_avx);
+      _mm256_storeu_ps(destination_addr, result_avx);
 
       // Don't forget the folks at the ends!
       if (j > 0) {
