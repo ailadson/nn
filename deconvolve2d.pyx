@@ -95,3 +95,28 @@ def deconvolve2d(
         np.float64_t[:, :] deriv_filter):
 
     deconvolve2d_(ipt, error, deriv_filter)
+
+def deriv_wrt_weights(
+        np.float64_t[:, :, :] input_layers,
+        np.float64_t[:, :, :, :] deriv_wrt_weights,
+        np.float64_t[:, :, :] deriv_wrt_unit_total_inputs):
+    cdef int input_layer_idx
+    cdef int num_output_layers = deriv_wrt_unit_total_inputs.shape[0]
+    cdef int output_layer_idx
+    cdef int num_input_layers = input_layers.shape[0]
+
+    for output_layer_idx in range(num_output_layers):
+        for input_layer_idx in range(num_input_layers):
+            input_layer = input_layers[input_layer_idx]
+            deriv_wrt_unit_total_inputs_layer = (
+                deriv_wrt_unit_total_inputs[output_layer_idx]
+            )
+            deriv_wrt_weights_layer = (
+                deriv_wrt_weights[output_layer_idx, input_layer_idx]
+            )
+
+            deconvolve2d_(
+                input_layer,
+                deriv_wrt_unit_total_inputs_layer,
+                deriv_wrt_weights_layer
+            )

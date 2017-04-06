@@ -3,7 +3,7 @@ from convolve2d import convolve2d as c2d, apply_convolution, apply_backwards_con
 import numpy as np
 from functions import *
 from deriv_cache import ConvDerivativeCache
-from deconvolve2d import deconvolve2d
+from deconvolve2d import deconvolve2d, deriv_wrt_weights
 
 
 class ConvolutionalLayer():
@@ -58,16 +58,13 @@ class ConvolutionalLayer():
         if self.deriv_cache.is_set("weights"):
             return self.deriv_cache.weights
 
-        #TODO: Backprop the biases
-        input_layers = self.prev_layer.output
-        deriv_wrt_unit_total_inputs = self.deriv_wrt_unit_total_inputs()
-        self.deriv_cache.weights *= 0
-        for output_layer_idx in range(self.weights.shape[0]):
-            for input_layer_idx in range(input_layers.shape[0]):
-                input_layer = input_layers[input_layer_idx]
-                bp_errors = deriv_wrt_unit_total_inputs[output_layer_idx]
-                deriv_filter = self.deriv_cache.weights[output_layer_idx, input_layer_idx]
-                deconvolve2d(input_layer, bp_errors, deriv_filter)
+        self.deriv_cache.weights.fill(0.0)
+        # TODO: we don't do anything to update the biases!
+        deriv_wrt_weights(
+            self.prev_layer.output,
+            self.deriv_cache.weights,
+            self.deriv_wrt_unit_total_inputs()
+        )
         self.deriv_cache.set('weights')
         return self.deriv_cache.weights
 
