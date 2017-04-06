@@ -10,13 +10,7 @@ def extension(name):
 
 setup(
     ext_modules=cythonize([
-        extension("deconvolve2d"),
-        extension("max_pooling_functions"),
-        extension("convolve2d"),
-
-        Extension("avx_convolve2d_main_py",
-                  ["./avx_convolve2d_py/main.pyx"],
-                  include_dirs = ["avx_convolve2d_py/", "./"])
+        Extension("main", ["main.pyx"])
     ])
 )
 
