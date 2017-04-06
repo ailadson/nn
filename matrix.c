@@ -12,18 +12,6 @@ float* allocate_matrix(shape_t shape) {
   return mat;
 }
 
-float mat_get(float* matrix, shape_t shape, size_t i, size_t j) {
-  return matrix[i * shape.width + j];
-}
-
-void mat_set(float* matrix, shape_t shape, size_t i, size_t j, float val) {
-  matrix[i * shape.width + j] = val;
-}
-
-float* mat_offset(float* matrix, shape_t shape, size_t i, size_t j) {
-  return matrix + (i * shape.width) + j;
-}
-
 float* build_example_input(shape_t image_shape) {
   float* input = allocate_matrix(image_shape);
   for (size_t i = 0; i < image_shape.height; i++) {
@@ -72,17 +60,4 @@ void print_matrix_corners(float* mat, shape_t shape) {
   printf("%6.2f ", mat_get(mat, shape, shape.height - 1, 0));
   printf("%6.2f ", mat_get(mat, shape, shape.height - 1, shape.width - 1));
   printf("\n");
-}
-
-// TODO: I'm not happy with this. Basically, if indexes are always
-// size_t then they can never be negative. But then I'm a little
-// concerned about when people subtract from indexes. Not a practical
-// problem because (0 - 1 == 2**64-1), which is way bigger than any
-// matrix dimension.
-bool row_in_bounds(shape_t shape, size_t row_idx) {
-  return row_idx < shape.height;
-}
-
-bool col_in_bounds(shape_t shape, size_t col_idx) {
-  return col_idx < shape.width;
 }
