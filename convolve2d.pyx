@@ -52,3 +52,20 @@ def convolve2d(
     np.float64_t[:, :] target):
 
     convolve2d_(ipt, kernel, target)
+
+def apply_convolution(
+    np.float64_t[:, :, :] input_layers,
+    np.float64_t[:, :, :, :] kernel_layers,
+    np.float64_t[:, :, :] output_layers):
+
+    cdef int input_layer_idx
+    cdef int num_input_layers = input_layers.shape[0]
+    cdef int output_layer_idx
+    cdef int num_output_layers = output_layers.shape[0]
+
+    for output_layer_idx in range(num_output_layers):
+        for input_layer_idx in range(num_input_layers):
+            input_layer = input_layers[input_layer_idx]
+            kernel_layer = kernel_layers[output_layer_idx, input_layer_idx]
+            output_layer = output_layers[output_layer_idx]
+            convolve2d_(input_layer, kernel_layer, output_layer)

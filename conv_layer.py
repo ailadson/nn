@@ -1,4 +1,4 @@
-from convolve2d import convolve2d as c2d
+from convolve2d import convolve2d as c2d, apply_convolution
 #from scipy.signal import convolve2d as c2d
 import numpy as np
 from functions import *
@@ -103,11 +103,7 @@ class ConvolutionalLayer():
                     deriv_wrt_prev_outputs[input_layer_idx])
 
     def apply_convolution(self, ipt, des):
-        for output_layer_idx in range(self.weights.shape[0]):
-            for input_layer_idx in range(self.weights.shape[1]):
-                input_layer = ipt[input_layer_idx]
-                kernel_weights = self.weights[output_layer_idx, input_layer_idx]
-                c2d(input_layer, kernel_weights, des[output_layer_idx])
+        apply_convolution(ipt, self.weights, des)
 
     def pad_flipped_weights(weights):
         height, width = weights.shape
