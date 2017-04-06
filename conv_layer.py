@@ -1,4 +1,4 @@
-from convolve2d import convolve2d as c2d, apply_convolution
+from convolve2d import convolve2d as c2d, apply_convolution, apply_backwards_convolution
 #from scipy.signal import convolve2d as c2d
 import numpy as np
 from functions import *
@@ -87,20 +87,19 @@ class ConvolutionalLayer():
         if self.deriv_cache.is_set("prev_outputs"):
             return self.deriv_cache.prev_outputs
         self.deriv_cache.prev_outputs *= 0
-        self.apply_backwards_convolution(self.deriv_wrt_unit_total_inputs(), self.deriv_cache.prev_outputs)
+        self.apply_backwards_convolution(
+            self.deriv_wrt_unit_total_inputs(),
+            self.deriv_cache.prev_outputs
+        )
         self.deriv_cache.set('prev_outputs')
         return self.deriv_cache.prev_outputs
 
     def apply_backwards_convolution(self, deriv_wrt_total_inputs, deriv_wrt_prev_outputs):
-        for output_layer_idx in range(self.weights.shape[0]):
-            for input_layer_idx in range(self.weights.shape[1]):
-                total_input_layer = deriv_wrt_total_inputs[output_layer_idx]
-                kernel_weights = self.weights[output_layer_idx, input_layer_idx]
-                # TODO: Should we pad in case of even sized kernel?
-                kernel_weights = np.fliplr(np.flipud(kernel_weights))
-                c2d(total_input_layer,
-                    kernel_weights,
-                    deriv_wrt_prev_outputs[input_layer_idx])
+        apply_backwards_convolution(
+            deriv_wrt_total_inputs,
+            self.weights,
+            deriv_wrt_prev_outputs
+        )
 
     def apply_convolution(self, ipt, des):
         apply_convolution(ipt, self.weights, des)
