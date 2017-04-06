@@ -47,7 +47,7 @@ void convolve1d(float* input,
   memset((char*) mask_row_overhang_arr, 0x00, 8 * sizeof(float));
   memset((char*) mask_row_overhang_arr,
          0xffffffff,
-         (image_shape.width % kernel_width) * sizeof(float));
+         (image_shape.width % 8) * sizeof(float));
   __m256 mask_row_overhang_avx = _mm256_loadu_ps(mask_row_overhang_arr);
 
   for (size_t i = 0; i < image_shape.height; i++) {
