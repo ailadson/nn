@@ -1,8 +1,8 @@
-import avx_convolve2d_main_py
+import main
 import time
 
 t = time.time()
 for i in range(8_000_000):
-    val = avx_convolve2d_main_py.main()
+    val = main.main()
 print(val)
 print(time.time() - t)
