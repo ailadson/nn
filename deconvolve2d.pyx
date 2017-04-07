@@ -2,6 +2,8 @@ cimport cython
 import numpy as np
 cimport numpy as np
 
+ctypedef np.float32_t DTYPE_t
+
 cdef struct bounds_s:
     int start_row
     int end_row
@@ -19,7 +21,7 @@ cdef int min(int a, int b) nogil:
     return a
 
 cdef bounds_s get_deconvolve_bounds(
-    np.float64_t[:, :] mat, int offset_row, int offset_col) nogil:
+    DTYPE_t[:, :] mat, int offset_row, int offset_col) nogil:
 
     cdef int num_of_rows = mat.shape[0]
     cdef int num_of_cols = mat.shape[1]
@@ -34,9 +36,9 @@ cdef bounds_s get_deconvolve_bounds(
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef np.float64_t sum_el_prod2d(
-      np.float64_t[:, :] ipt,
-      np.float64_t[:, :] err,
+cdef DTYPE_t sum_el_prod2d(
+      DTYPE_t[:, :] ipt,
+      DTYPE_t[:, :] err,
       int ipt_start_row,
       int ipt_start_col,
       int err_start_row,
@@ -44,9 +46,9 @@ cdef np.float64_t sum_el_prod2d(
       int num_rows,
       int num_cols) nogil:
 
-    cdef np.float64_t s = 0
+    cdef DTYPE_t s = 0
     cdef int i, j
-    cdef np.float64_t ipt_el, err_el
+    cdef DTYPE_t ipt_el, err_el
 
     for i in range(num_rows):
         for j in range(num_cols):
@@ -58,9 +60,9 @@ cdef np.float64_t sum_el_prod2d(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void deconvolve2d_(
-        np.float64_t[:, :] ipt,
-        np.float64_t[:, :] error,
-        np.float64_t[:, :] deriv_filter) nogil:
+        DTYPE_t[:, :] ipt,
+        DTYPE_t[:, :] error,
+        DTYPE_t[:, :] deriv_filter) nogil:
 
     cdef int krows = deriv_filter.shape[0]
     cdef int kcols = deriv_filter.shape[1]
@@ -90,16 +92,16 @@ cdef void deconvolve2d_(
             )
 
 def deconvolve2d(
-        np.float64_t[:, :] ipt,
-        np.float64_t[:, :] error,
-        np.float64_t[:, :] deriv_filter):
+        DTYPE_t[:, :] ipt,
+        DTYPE_t[:, :] error,
+        DTYPE_t[:, :] deriv_filter):
 
     deconvolve2d_(ipt, error, deriv_filter)
 
 def deriv_wrt_weights(
-        np.float64_t[:, :, :] input_layers,
-        np.float64_t[:, :, :, :] deriv_wrt_weights,
-        np.float64_t[:, :, :] deriv_wrt_unit_total_inputs):
+        DTYPE_t[:, :, :] input_layers,
+        DTYPE_t[:, :, :, :] deriv_wrt_weights,
+        DTYPE_t[:, :, :] deriv_wrt_unit_total_inputs):
     cdef int input_layer_idx
     cdef int num_output_layers = deriv_wrt_unit_total_inputs.shape[0]
     cdef int output_layer_idx

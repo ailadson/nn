@@ -3,7 +3,7 @@ cimport numpy as np
 from numpy.math cimport INFINITY
 
 
-ctypedef np.float64_t DTYPE_t
+ctypedef np.float32_t DTYPE_t
 
 cdef struct s_int_pair:
     int i
@@ -105,7 +105,7 @@ cdef void apply_max_pooling_(
     cdef int height = ipt.shape[1]
     cdef int width = ipt.shape[2]
     cdef int channel_idx, i, j
-    cdef np.float64_t curr_val, next_val
+    cdef DTYPE_t curr_val, next_val
 
     des[:, :, :] = -INFINITY
 

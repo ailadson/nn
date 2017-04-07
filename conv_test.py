@@ -10,7 +10,7 @@ im = Image.open("./imgs/convolve_test3.jpeg")
 data = np.array(im)
 data = np.transpose(data, (2,0,1))
 data = data[0:1, :, :]
-data = data.astype('float64')
+data = data.astype('float32')
 
 # create net
 net = Net()
