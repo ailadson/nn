@@ -2,22 +2,42 @@
 #include "avx_convolve2d.h"
 #include <immintrin.h>
 #include "matrix.h"
+#include <stdlib.h>
 #include <string.h>
 
-void convolve1d(float* input,
-                float* kernel,
-                float* destination,
-                shape_t image_shape,
-                size_t kernel_width,
-                size_t kernel_row_offset) {
+typedef enum {
+  FORWARD,
+  BACKWARD
+} direction_t;
+
+void convolve1d(
+  float* input,
+  float* kernel,
+  float* destination,
+  shape_t image_shape,
+  size_t kernel_width,
+  size_t kernel_row_offset,
+  direction_t dir) {
+
   assert(kernel_width == 3);
 
   float k0_arr[8] = { [0 ... 7] = kernel[0] };
   float k1_arr[8] = { [0 ... 7] = kernel[1] };
   float k2_arr[8] = { [0 ... 7] = kernel[2] };
-  __m256 k0_avx = _mm256_loadu_ps(k0_arr);
-  __m256 k1_avx = _mm256_loadu_ps(k1_arr);
-  __m256 k2_avx = _mm256_loadu_ps(k2_arr);
+  __m256 k0_avx;
+  __m256 k1_avx;
+  __m256 k2_avx;
+  if (dir == FORWARD) {
+    k0_avx = _mm256_loadu_ps(k0_arr);
+    k1_avx = _mm256_loadu_ps(k1_arr);
+    k2_avx = _mm256_loadu_ps(k2_arr);
+  } else if (dir == BACKWARD) {
+    k0_avx = _mm256_loadu_ps(k2_arr);
+    k1_avx = _mm256_loadu_ps(k1_arr);
+    k2_avx = _mm256_loadu_ps(k0_arr);
+  } else {
+    abort();
+  }
 
   // Hack to get a float of zeros and a float of ones.
   float zeros_float;
@@ -101,12 +121,24 @@ void convolve1d(float* input,
   }
 }
 
-void convolve2d(float* input,
-                float* kernel,
-                float* destination,
-                shape_t image_shape,
-                shape_t kernel_shape) {
-  size_t mid_i = kernel_shape.height / 2;
+void convolve2d_(
+  float* input,
+  float* kernel,
+  float* destination,
+  shape_t image_shape,
+  shape_t kernel_shape,
+  direction_t dir) {
+
+  size_t mid_i;
+  size_t num_rows = kernel_shape.height;
+  if (dir == FORWARD) {
+    mid_i = num_rows / 2;
+  } else if (dir == BACKWARD) {
+    mid_i = (num_rows - 1) - (num_rows / 2);
+  } else {
+    abort();
+  }
+
   for (size_t i = 0; i < kernel_shape.height; i++) {
     size_t kernel_row_offset = i - mid_i;
     convolve1d(input,
@@ -114,6 +146,42 @@ void convolve2d(float* input,
                destination,
                image_shape,
                kernel_shape.width,
-               kernel_row_offset);
+               kernel_row_offset,
+               dir);
   }
+}
+
+
+void convolve2d(
+  float* input,
+  float* kernel,
+  float* destination,
+  shape_t image_shape,
+  shape_t kernel_shape) {
+
+  convolve2d_(
+    input,
+    kernel,
+    destination,
+    image_shape,
+    kernel_shape,
+    FORWARD
+  );
+}
+
+void backward_convolve2d(
+  float* input,
+  float* kernel,
+  float* destination,
+  shape_t image_shape,
+  shape_t kernel_shape) {
+
+  convolve2d_(
+    input,
+    kernel,
+    destination,
+    image_shape,
+    kernel_shape,
+    BACKWARD
+  );
 }
