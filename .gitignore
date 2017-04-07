@@ -10,9 +10,7 @@ avxtest.c
 *.prof
 a.out
 
-# other executable files
-convolution
-ned_convolution_test_avx
-
+c/avx_convolve2d
+c/convolution
 pyx/*.c
 pyx/*.so
