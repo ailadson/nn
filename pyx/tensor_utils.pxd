@@ -59,8 +59,8 @@ cdef inline Rank2Tensor rank4_offset(
         i * in_tensor.shape.dim1 * in_tensor.shape.dim2 * in_tensor.shape.dim3
     )
     out_tensor.data += j * in_tensor.shape.dim2 * in_tensor.shape.dim3
-    out_tensor.shape.dim0 = in_tensor.shape.dim1
-    out_tensor.shape.dim1 = in_tensor.shape.dim2
+    out_tensor.shape.dim0 = in_tensor.shape.dim2
+    out_tensor.shape.dim1 = in_tensor.shape.dim3
 
     return out_tensor
 
