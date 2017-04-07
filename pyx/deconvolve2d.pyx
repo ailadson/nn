@@ -4,132 +4,97 @@ cimport cython
 cimport numpy as np
 from tensor_utils cimport *
 
-cdef struct bounds_s:
-    int start_row
-    int end_row
-    int start_col
-    int end_col
+cdef DTYPE_t deconvolve2d_step(
+        Rank2Tensor prev_output_layer,
+        Rank2Tensor deriv_wrt_total_inputs_layer,
+        int kernel_offset_i,
+        int kernel_offset_j) nogil:
 
-cdef int max(int a, int b) nogil:
-    if a > b:
-        return a
-    return b
+    cdef int img_rows = prev_output_layer.shape.dim0
+    cdef int img_cols = prev_output_layer.shape.dim1
+    cdef int prev_output_i, prev_output_j
+    cdef int total_input_i, total_input_j
+    cdef DTYPE_t val = 0.0
 
-cdef int min(int a, int b) nogil:
-    if a > b:
-        return b
-    return a
-
-cdef bounds_s get_deconvolve_bounds(
-    Rank2Shape shape, int offset_row, int offset_col) nogil:
-
-    cdef int num_of_rows = shape.dim0
-    cdef int num_of_cols = shape.dim1
-    cdef bounds_s bounds
-
-    bounds.start_row = max(offset_row, 0)
-    bounds.end_row = min(offset_row + num_of_rows, num_of_rows)
-    bounds.start_col = max(offset_col, 0)
-    bounds.end_col = min(offset_col + num_of_cols, num_of_cols)
-
-    return bounds
-
-cdef DTYPE_t sum_el_prod2d(
-      Rank2Tensor ipt,
-      Rank2Tensor err,
-      bounds_s ipt_bounds,
-      bounds_s err_bounds) nogil:
-
-    cdef DTYPE_t s = 0.0
-    cdef DTYPE_t ipt_el, err_el
-    cdef int num_rows = ipt_bounds.end_row - ipt_bounds.start_row
-    cdef int num_cols = ipt_bounds.end_col - ipt_bounds.end_col
-    cdef int i, j
-
-    for i in range(num_rows):
-        for j in range(num_cols):
-            ipt_el = rank2_get(
-                ipt, ipt_bounds.start_row + i, ipt_bounds.start_col + j
-            )
-            err_el = rank2_get(
-                err, err_bounds.start_row + i, err_bounds.start_col + j
+    for prev_output_i in range(img_rows):
+        total_input_i = prev_output_i + kernel_offset_i
+        if total_input_i < 0 or total_input_i >= img_rows:
+            continue
+        for prev_output_j in range(img_cols):
+            total_input_j = prev_output_j + kernel_offset_j
+            if total_input_j < 0 or total_input_j >= img_cols:
+                continue
+            val += (
+                rank2_get(prev_output_layer, prev_output_i, prev_output_j) *
+                rank2_get(deriv_wrt_total_inputs_layer, total_input_i, total_input_j)
             )
 
-            s += ipt_el * err_el
-
-    return s
+    return val
 
 cdef void deconvolve2d_(
-        Rank2Tensor ipt,
-        Rank2Tensor error,
-        Rank2Tensor deriv_filter) nogil:
+        Rank2Tensor prev_output_layer,
+        Rank2Tensor deriv_wrt_weights_layer,
+        Rank2Tensor deriv_wrt_total_inputs_layer) nogil:
 
-    cdef int krows = deriv_filter.shape.dim0
-    cdef int kcols = deriv_filter.shape.dim1
-    cdef int i, j
-    cdef int offset_row, offset_col
-    cdef bounds_s ipt_bounds
-    cdef bounds_s error_bounds
+    cdef int krows = deriv_wrt_weights_layer.shape.dim0
+    cdef int kcols = deriv_wrt_weights_layer.shape.dim1
+    cdef int kernel_i, kernel_j
+    cdef int kernel_offset_i, kernel_offset_j
     cdef DTYPE_t val
 
-    for i in range(krows):
-        for j in range(kcols):
-            offset_row = i - (krows // 2)
-            offset_col = j - (kcols // 2)
-            ipt_bounds = get_deconvolve_bounds(
-                ipt.shape, offset_row, offset_col
-            )
-            error_bounds = get_deconvolve_bounds(
-                error.shape, -1 * offset_row, -1 * offset_col
-            )
+    for kernel_i in range(krows):
+        for kernel_j in range(kcols):
+            kernel_offset_i = kernel_i - (krows // 2)
+            kernel_offset_j = kernel_j - (kcols // 2)
 
             # += meant for accumulating errors in the deriv filter
-            val = sum_el_prod2d(
-                ipt, error, ipt_bounds, error_bounds
-            )
-            rank2_inc(deriv_filter, i, j, val)
+            val = deconvolve2d_step(prev_output_layer,
+                                    deriv_wrt_total_inputs_layer,
+                                    kernel_offset_i,
+                                    kernel_offset_j)
+            rank2_inc(deriv_wrt_weights_layer, kernel_i, kernel_j, val)
 
 cdef void deriv_wrt_weights_(
-        Rank3Tensor input_tensor,
+        Rank3Tensor prev_output_tensor,
         Rank4Tensor deriv_wrt_weights_tensor,
         Rank3Tensor deriv_wrt_total_inputs_tensor) nogil:
 
-    cdef int input_layer_idx
-    cdef int num_output_layers = (
+    cdef int prev_output_layer_idx
+    cdef int total_input_layer_idx
+    cdef int num_prev_output_layers = prev_output_tensor.shape.dim0
+    cdef int num_total_input_layers = (
         deriv_wrt_total_inputs_tensor.shape.dim0
     )
-    cdef int output_layer_idx
-    cdef int num_input_layers = input_tensor.shape.dim0
 
-    cdef Rank2Tensor input_layer
-    cdef Rank2Tensor deriv_wrt_total_inputs_layer
+    cdef Rank2Tensor prev_output_layer
     cdef Rank2Tensor deriv_wrt_weights_layer
+    cdef Rank2Tensor deriv_wrt_total_inputs_layer
 
-    for output_layer_idx in range(num_output_layers):
-        for input_layer_idx in range(num_input_layers):
-            input_layer = rank3_offset(input_tensor, input_layer_idx)
-            deriv_wrt_total_inputs_layer = rank3_offset(
-                deriv_wrt_total_inputs_tensor, output_layer_idx
-            )
+    for total_input_layer_idx in range(num_total_input_layers):
+        for prev_output_layer_idx in range(num_prev_output_layers):
+            prev_output_layer = rank3_offset(prev_output_tensor, prev_output_layer_idx)
             deriv_wrt_weights_layer = rank4_offset(
-                deriv_wrt_weights_tensor,
-                output_layer_idx,
-                input_layer_idx
+              deriv_wrt_weights_tensor,
+              total_input_layer_idx,
+              prev_output_layer_idx
+            )
+            deriv_wrt_total_inputs_layer = rank3_offset(
+                deriv_wrt_total_inputs_tensor, total_input_layer_idx
             )
 
             deconvolve2d_(
-                input_layer,
-                deriv_wrt_total_inputs_layer,
-                deriv_wrt_weights_layer
+                prev_output_layer,
+                deriv_wrt_weights_layer,
+                deriv_wrt_total_inputs_layer
             )
 
 def deriv_wrt_weights(
-        DTYPE_t[:, :, :] input_layers,
+        DTYPE_t[:, :, :] prev_output_layers,
         DTYPE_t[:, :, :, :] deriv_wrt_weights,
         DTYPE_t[:, :, :] deriv_wrt_unit_total_inputs):
 
-    cdef Rank3Tensor input_tensor = (
-        memview_to_rank3_tensor(input_layers)
+    cdef Rank3Tensor prev_output_tensor = (
+        memview_to_rank3_tensor(prev_output_layers)
     )
     cdef Rank4Tensor deriv_wrt_weights_tensor = (
         memview_to_rank4_tensor(deriv_wrt_weights)
@@ -139,7 +104,7 @@ def deriv_wrt_weights(
     )
 
     deriv_wrt_weights_(
-        input_tensor,
+        prev_output_tensor,
         deriv_wrt_weights_tensor,
         deriv_wrt_total_inputs_tensor
     )

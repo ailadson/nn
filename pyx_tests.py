@@ -3,7 +3,7 @@ import numpy as np
 import pyx.avx_convolve2d as convolve2d
 import pyx.deconvolve2d as deconvolve2d
 
-IMG_DIM = 28
+IMG_DIM = 16
 def make_test_input():
     x = np.zeros((1, IMG_DIM, IMG_DIM)).astype(np.float32)
 
@@ -16,6 +16,10 @@ KERNEL_DIM = 3
 def make_identity_kernel():
     k = np.zeros((1, 1, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
     k[0, 0, KERNEL_DIM // 2, KERNEL_DIM // 2] = 1.0
+    return k
+
+def make_blank_kernel():
+    k = np.zeros((1, 1, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
     return k
 
 def make_fancy_kernel():
@@ -66,6 +70,18 @@ def expected_simple_backward_conv_output():
         y[0, i, j] = (i + 1) + (j + 1)
     return y
 
+def naive_deconvolve(input, kernel, output):
+    for (kernel_i, kernel_j) in product(range(KERNEL_DIM), range(KERNEL_DIM)):
+        kernel_offset_i = kernel_i - KERNEL_DIM // 2
+        kernel_offset_j = kernel_j - KERNEL_DIM // 2
+        for (input_i, input_j) in product(range(IMG_DIM), range(IMG_DIM)):
+            out_i = input_i + kernel_offset_i
+            out_j = input_j + kernel_offset_j
+            if out_i < 0 or out_i >= IMG_DIM or out_j < 0 or out_j >= IMG_DIM:
+                continue
+            kernel[0, 0, kernel_i, kernel_j] += (
+                output[0, out_i, out_j] * input[0, input_i, input_j]
+            )
 
 def test_identity_kernel():
     x = make_test_input()
@@ -91,6 +107,19 @@ def test_backward_convolve():
     assert (y == expected_simple_backward_conv_output()).all()
     print("Backward kernel test passed!")
 
+def test_deconvolve():
+    x = make_test_input()
+    y = make_test_input() + 1
+    k = make_blank_kernel()
+
+    expected_k = make_blank_kernel()
+    naive_deconvolve(x, expected_k, y)
+
+    deconvolve2d.deriv_wrt_weights(x, k, y)
+    assert (k == expected_k).all()
+    print("Deconvolve2d test passed!")
+
 test_identity_kernel()
 test_fancy_kernel()
 test_backward_convolve()
+test_deconvolve()
