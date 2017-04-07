@@ -1,12 +1,15 @@
 cimport cython
 cimport numpy as np
+cimport avx_convolve2d_py.main as avx_convolve2d_py
+
+ctypedef np.float32_t DTYPE_t
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void convolve_step(
-    np.float64_t[:, :] ipt,
-    np.float64_t[:, :] target,
-    np.float64_t kval,
+    DTYPE_t[:, :] ipt,
+    DTYPE_t[:, :] target,
+    DTYPE_t kval,
     int kernel_offset_i,
     int kernel_offset_j) nogil:
 
@@ -30,9 +33,9 @@ cdef void convolve_step(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void convolve2d_(
-    np.float64_t[:, :] ipt,
-    np.float64_t[:, :] kernel,
-    np.float64_t[:, :] target) nogil:
+    DTYPE_t[:, :] ipt,
+    DTYPE_t[:, :] kernel,
+    DTYPE_t[:, :] target) nogil:
 
     cdef int krows = kernel.shape[0]
     cdef int kcols = kernel.shape[1]
@@ -46,10 +49,11 @@ cdef void convolve2d_(
                 ipt, target, kernel[i, j], i - mid_i, j - mid_j
             )
 
+@cython.boundscheck(False)
 cdef void backward_convolve2d_(
-    np.float64_t[:, :] ipt,
-    np.float64_t[:, :] kernel,
-    np.float64_t[:, :] target) nogil:
+    DTYPE_t[:, :] ipt,
+    DTYPE_t[:, :] kernel,
+    DTYPE_t[:, :] target) nogil:
 
     cdef int krows = kernel.shape[0]
     cdef int kcols = kernel.shape[1]
@@ -70,16 +74,16 @@ cdef void backward_convolve2d_(
             )
 
 def convolve2d(
-    np.float64_t[:, :] ipt,
-    np.float64_t[:, :] kernel,
-    np.float64_t[:, :] target):
+    DTYPE_t[:, :] ipt,
+    DTYPE_t[:, :] kernel,
+    DTYPE_t[:, :] target):
 
     convolve2d_(ipt, kernel, target)
 
 def apply_convolution(
-    np.float64_t[:, :, :] input_layers,
-    np.float64_t[:, :, :, :] kernel_layers,
-    np.float64_t[:, :, :] output_layers):
+    DTYPE_t[:, :, :] input_layers,
+    DTYPE_t[:, :, :, :] kernel_layers,
+    DTYPE_t[:, :, :] output_layers):
 
     cdef int input_layer_idx
     cdef int num_input_layers = input_layers.shape[0]
@@ -91,12 +95,12 @@ def apply_convolution(
             input_layer = input_layers[input_layer_idx]
             kernel_layer = kernel_layers[output_layer_idx, input_layer_idx]
             output_layer = output_layers[output_layer_idx]
-            convolve2d_(input_layer, kernel_layer, output_layer)
+            avx_convolve2d_py.avx_convolve2d(input_layer, kernel_layer, output_layer)
 
 def apply_backwards_convolution(
-        np.float64_t[:, :, :] deriv_wrt_total_inputs,
-        np.float64_t[:, :, :, :] kernel_layers,
-        np.float64_t[:, :, :] deriv_wrt_prev_outputs):
+        DTYPE_t[:, :, :] deriv_wrt_total_inputs,
+        DTYPE_t[:, :, :, :] kernel_layers,
+        DTYPE_t[:, :, :] deriv_wrt_prev_outputs):
 
     cdef int input_layer_idx
     cdef int num_input_layers = deriv_wrt_prev_outputs.shape[0]

@@ -5,7 +5,7 @@ import numpy
 def extension(name):
     return Extension(
         name, [f"{name}.pyx"],
-        include_dirs = [numpy.get_include()],
+        include_dirs = [numpy.get_include(), "./"],
     )
 
 setup(

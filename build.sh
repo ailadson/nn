@@ -15,17 +15,17 @@ python setup.py build_ext --inplace
 cd ..
 
 # OSX version
-ANACONDA_DIR=/Users/ruggeri/.anaconda3
+ANACONDA_DIR=/Users/anthonyladson/anaconda
 LIB_PYTHON=$ANACONDA_DIR/lib-lpython3.6m
 BUILD_DIR=avx_convolve2d_py/build/temp.macosx-10.7-x86_64-3.6
 
 $GCC -bundle -undefined dynamic_lookup \
-     -L/Users/ruggeri/.anaconda3/lib \
-     -L/Users/ruggeri/.anaconda3/lib \
+     -L/Users/anthonyladson/anaconda/lib \
+     -L/Users/anthonyladson/anaconda/lib \
      -arch x86_64 \
      $BUILD_DIR/main.o \
      matrix.o avx_convolve2d.o \
-     -L/Users/ruggeri/.anaconda3/lib \
+     -L/Users/anthonyladson/anaconda/lib \
      -o avx_convolve2d_py/main.cpython-36m-darwin.so
 
 # Linux version
