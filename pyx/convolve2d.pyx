@@ -80,7 +80,7 @@ def convolve2d(
 
     convolve2d_(ipt, kernel, target)
 
-def apply_convolution(
+cdef apply_convolution_(
     DTYPE_t[:, :, :] input_layers,
     DTYPE_t[:, :, :, :] kernel_layers,
     DTYPE_t[:, :, :] output_layers):
@@ -101,7 +101,14 @@ def apply_convolution(
                 input_layer, kernel_layer, output_layer
             )
 
-def apply_backwards_convolution(
+def apply_convolution(
+    DTYPE_t[:, :, :] input_layers,
+    DTYPE_t[:, :, :, :] kernel_layers,
+    DTYPE_t[:, :, :] output_layers):
+
+    apply_convolution_(input_layers, kernel_layers, output_layers)
+
+cdef apply_backward_convolution_(
         DTYPE_t[:, :, :] deriv_wrt_total_inputs,
         DTYPE_t[:, :, :, :] kernel_layers,
         DTYPE_t[:, :, :] deriv_wrt_prev_outputs):
@@ -119,8 +126,18 @@ def apply_backwards_convolution(
             )
             prev_output_layer = deriv_wrt_prev_outputs[input_layer_idx]
 
-            avx_convolve2d_py.backward_convolve2d_(
+            avx_convolve2d_py.avx_backward_convolve2d_(
                 total_input_layer,
                 kernel_layer,
                 prev_output_layer
             )
+
+def apply_backward_convolution(
+        DTYPE_t[:, :, :] deriv_wrt_total_inputs,
+        DTYPE_t[:, :, :, :] kernel_layers,
+        DTYPE_t[:, :, :] deriv_wrt_prev_outputs):
+    apply_backward_convolution_(
+        deriv_wrt_total_inputs,
+        kernel_layers,
+        deriv_wrt_prev_outputs
+    )

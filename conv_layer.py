@@ -82,15 +82,19 @@ class ConvolutionalLayer():
         if self.deriv_cache.is_set("prev_outputs"):
             return self.deriv_cache.prev_outputs
         self.deriv_cache.prev_outputs *= 0
-        self.apply_backwards_convolution(
+        self.apply_backward_convolution(
             self.deriv_wrt_unit_total_inputs(),
             self.deriv_cache.prev_outputs
         )
         self.deriv_cache.set('prev_outputs')
         return self.deriv_cache.prev_outputs
 
-    def apply_backwards_convolution(self, deriv_wrt_total_inputs, deriv_wrt_prev_outputs):
-        pyx.convolve2d.apply_backwards_convolution(
+    def apply_backward_convolution(
+            self,
+            deriv_wrt_total_inputs,
+            deriv_wrt_prev_outputs):
+
+        pyx.convolve2d.apply_backward_convolution(
             deriv_wrt_total_inputs,
             self.weights,
             deriv_wrt_prev_outputs
