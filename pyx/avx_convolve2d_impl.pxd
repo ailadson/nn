@@ -1,3 +1,6 @@
+# This pxd file is like a header for the C avx_convolve2d and matrix
+# code.
+
 cdef extern from "avx_convolve2d.h":
     void convolve2d(
         float* input,

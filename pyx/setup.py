@@ -10,9 +10,9 @@ def extension(name):
 
 setup(
     ext_modules=cythonize([
+        extension("avx_convolve2d"),
+        extension("basic_convolve2d"),
         extension("deconvolve2d"),
         extension("max_pooling_functions"),
-        extension("convolve2d"),
-        extension("avx_convolve2d_py"),
     ])
 )

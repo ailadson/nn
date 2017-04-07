@@ -1,3 +1,5 @@
+# TODO: rewrite this Cython code in an AVX style!
+
 cimport cython
 import numpy as np
 cimport numpy as np

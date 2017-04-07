@@ -12,7 +12,7 @@ cd pyx
 ./build.sh
 cd ..
 
-# Then link C modules and avx_convolve2d_py together.
+# Then link C modules and avx_convolve2d together.
 
 unamestr=`uname`
 if [[ "$unamestr" == "Darwin" ]]; then
@@ -25,8 +25,8 @@ if [[ "$unamestr" == "Darwin" ]]; then
          -L$ANACONDA_DIR/lib \
          -arch x86_64 \
          ./c/matrix.o ./c/avx_convolve2d.o \
-         $BUILD_DIR/convolve2d.o \
-         -o ./pyx/convolve2d.cpython-36m-darwin.so
+         $BUILD_DIR/avx_convolve2d.o \
+         -o ./pyx/avx_convolve2d.cpython-36m-darwin.so
 elif [[ "$unamestr" == "Linux" ]]; then
     GCC=gcc
     ANACONDA_DIR=/home/ubuntu/.anaconda3
@@ -35,9 +35,9 @@ elif [[ "$unamestr" == "Linux" ]]; then
     $GCC -pthread -shared -L$ANACONDA_DIR/lib \
          -Wl,-rpath=$ANACONDA_DIR/lib,--no-as-needed \
          c/matrix.o c/avx_convolve2d.o \
-         $BUILD_DIR/convolve2d.o \
+         $BUILD_DIR/avx_convolve2d.o \
          -lpython3.6m \
-         -o ./pyx/convolve2d.cpython-36m-x86_64-linux-gnu.so
+         -o ./pyx/avx_convolve2d.cpython-36m-x86_64-linux-gnu.so
 else
     exit 1
 fi

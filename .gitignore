@@ -10,8 +10,3 @@ max_pooling_functions.c
 avxtest.c
 *.prof
 a.out
-
-c/avx_convolve2d
-c/convolution
-pyx/*.c
-pyx/*.so

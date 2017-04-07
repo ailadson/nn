@@ -1,5 +1,7 @@
-cimport avx_convolve2d as avx
-cimport cython
+# This code translates from Numpy world to the AVX code we have
+# written in C.
+
+cimport avx_convolve2d_impl as avx_impl
 cimport numpy as np
 
 ctypedef np.float32_t DTYPE_t
@@ -8,85 +10,7 @@ cdef enum direction_t:
     FORWARD,
     BACKWARD
 
-# === Traditional Cython Implementation ===
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef void convolve_step(
-    DTYPE_t[:, :] ipt,
-    DTYPE_t[:, :] target,
-    DTYPE_t kval,
-    int kernel_offset_i,
-    int kernel_offset_j) nogil:
-
-    cdef int num_rows = ipt.shape[0]
-    cdef int num_cols = ipt.shape[1]
-    cdef int i, j
-    cdef int i2, j2
-
-    for i in range(num_rows):
-        for j in range(num_cols):
-            i2 = i + kernel_offset_i
-            j2 = j + kernel_offset_j
-
-            if (i2 < 0) | (i2 > num_rows):
-                continue
-            if (j2 < 0) | (j2 > num_rows):
-                continue
-
-            target[i, j] += ipt[i2, j2] * kval
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef void convolve2d_(
-    DTYPE_t[:, :] ipt,
-    DTYPE_t[:, :] kernel,
-    DTYPE_t[:, :] target) nogil:
-
-    cdef int krows = kernel.shape[0]
-    cdef int kcols = kernel.shape[1]
-    cdef int mid_i = kernel.shape[0] // 2
-    cdef int mid_j = kernel.shape[1] // 2
-    cdef int i, j
-
-    for i in range(krows):
-        for j in range(kcols):
-            convolve_step(
-                ipt, target, kernel[i, j], i - mid_i, j - mid_j
-            )
-
-@cython.boundscheck(False)
-cdef void backward_convolve2d_(
-    DTYPE_t[:, :] ipt,
-    DTYPE_t[:, :] kernel,
-    DTYPE_t[:, :] target) nogil:
-
-    cdef int krows = kernel.shape[0]
-    cdef int kcols = kernel.shape[1]
-    # If the kernel has a non-odd KSIZE I believe the center is
-    # adjusted slightly... This code may be wrong though.
-    cdef int mid_i = (krows - 1) - (krows // 2)
-    cdef int mid_j = (kcols - 1) - (kcols // 2)
-    cdef int i, j
-
-    for i in range(krows):
-        for j in range(kcols):
-            # Backward convolution means flipping the kernel
-            # left/right and up/down.
-            i = (krows - 1) - i
-            j = (kcols - 1) - j
-            convolve_step(
-                ipt, target, kernel[i, j], i - mid_i, j - mid_j
-            )
-
-def convolve2d(
-    DTYPE_t[:, :] ipt,
-    DTYPE_t[:, :] kernel,
-    DTYPE_t[:, :] target):
-
-    convolve2d_(ipt, kernel, target)
-
-# === AVX Implementation ===
-
+# These structs are an alternative to the shape attribute.
 cdef struct Rank2Shape:
     int dim0
     int dim1
@@ -102,6 +26,7 @@ cdef struct Rank4Shape:
     int dim2
     int dim3
 
+# Helpers for calculation of offsets.
 cdef float* rank3_offset(
     float* matrix,
     Rank3Shape shape,
@@ -120,6 +45,9 @@ cdef float* rank4_offset(
     result += j * (shape.dim2 * shape.dim3)
     return result
 
+# This method (1) iterates through the various layers, (2) calculates
+# the proper offset into the matrices, and (3) passes this on to the
+# AVX C code.
 cdef void apply_convolution2_(
     DTYPE_t* input_layers,
     Rank3Shape input_layers_shape,
@@ -138,10 +66,10 @@ cdef void apply_convolution2_(
     cdef float* kernel_layer
     cdef float* output_layer
 
-    cdef avx.shape_t image_shape
+    cdef avx_impl.shape_t image_shape
     image_shape.height = input_layers_shape.dim1
     image_shape.width = input_layers_shape.dim2
-    cdef avx.shape_t kernel_shape
+    cdef avx_impl.shape_t kernel_shape
     kernel_shape.height = kernel_layers_shape.dim2
     kernel_shape.width = kernel_layers_shape.dim3
 
@@ -162,7 +90,7 @@ cdef void apply_convolution2_(
             )
 
             if (direction == FORWARD):
-                avx.convolve2d(
+                avx_impl.convolve2d(
                     input_layer,
                     kernel_layer,
                     output_layer,
@@ -170,7 +98,7 @@ cdef void apply_convolution2_(
                     kernel_shape
                 )
             else:
-                avx.backward_convolve2d(
+                avx_impl.backward_convolve2d(
                     input_layer,
                     kernel_layer,
                     output_layer,
@@ -178,6 +106,7 @@ cdef void apply_convolution2_(
                     kernel_shape
                 )
 
+# This method prepares a bunch of pointers and shape objects.
 cdef void apply_convolution_(
     DTYPE_t[:, :, :] input_layers,
     DTYPE_t[:, :, :, :] kernel_layers,
@@ -208,6 +137,7 @@ cdef void apply_convolution_(
         direction
     )
 
+# These are the final user-facing methods!
 def apply_convolution(
     DTYPE_t[:, :, :] input_layers,
     DTYPE_t[:, :, :, :] kernel_layers,

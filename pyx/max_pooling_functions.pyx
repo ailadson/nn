@@ -2,7 +2,6 @@ cimport cython
 cimport numpy as np
 from numpy.math cimport INFINITY
 
-
 ctypedef np.float32_t DTYPE_t
 
 cdef struct s_int_pair:
