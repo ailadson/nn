@@ -3,10 +3,10 @@ import numpy as np
 
 class DerivativeCache:
     def __init__(self, layer):
-        self.weights = np.zeros([layer.num_units, layer.prev_layer.num_units])
-        self.prev_outputs = np.zeros([layer.prev_layer.num_units])
-        self.unit_total_inputs = np.zeros([layer.num_units])
-        self.biases = np.zeros([layer.num_units])
+        self.weights = np.zeros([layer.num_units, layer.prev_layer.num_units], dtype=np.float32)
+        self.prev_outputs = np.zeros([layer.prev_layer.num_units], dtype=np.float32)
+        self.unit_total_inputs = np.zeros([layer.num_units], dtype=np.float32)
+        self.biases = np.zeros([layer.num_units], dtype=np.float32)
         self.reset()
 
     def reset(self):
@@ -27,14 +27,14 @@ class DerivativeCache:
 
 class ConvDerivativeCache(DerivativeCache):
     def __init__(self, layer):
-        self.weights = np.zeros(layer.weights.shape)
-        self.prev_outputs = np.zeros(layer.prev_layer.output.shape)
-        self.unit_total_inputs = np.zeros(layer.total_input.shape)
-        self.biases = np.zeros((layer.weights.shape[0], 1, 1))
+        self.weights = np.zeros(layer.weights.shape, dtype=np.float32)
+        self.prev_outputs = np.zeros(layer.prev_layer.output.shape, dtype=np.float32)
+        self.unit_total_inputs = np.zeros(layer.total_input.shape, dtype=np.float32)
+        self.biases = np.zeros((layer.weights.shape[0], 1, 1), dtype=np.float32)
         self.reset()
 
 class MaxPoolDerivativeCache(DerivativeCache):
     def __init__(self, layer):
-        self.prev_outputs = np.zeros(layer.prev_layer.output.shape)
-        self.unit_total_inputs = np.zeros(layer.total_input.shape)
+        self.prev_outputs = np.zeros(layer.prev_layer.output.shape, dtype=np.float32)
+        self.unit_total_inputs = np.zeros(layer.total_input.shape, dtype=np.float32)
         self.reset()

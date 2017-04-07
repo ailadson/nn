@@ -37,8 +37,8 @@ observed = np.copy(net.forward_propagate(data))
 # img.show()
 
 # randomize weights
-net.layers[1].weights += np.random.uniform(size=[1, 1, 3, 3]) #net.layers[1].initialize_weights()
-net.layers[2].weights += np.random.uniform(size=[1, 1, 3, 3]) #= net.layers[2].initialize_weights()
+net.layers[1].weights += np.random.uniform(size=[1, 1, 3, 3]).astype(np.float32) #net.layers[1].initialize_weights()
+net.layers[2].weights += np.random.uniform(size=[1, 1, 3, 3]).astype(np.float32) #= net.layers[2].initialize_weights()
 net.layers[2].deriv_wrt_weights = net.layers[2].regularized_deriv_wrt_weights
 # import types
 # def my_has_weights(self):

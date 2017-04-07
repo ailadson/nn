@@ -15,14 +15,14 @@ class ConvolutionalLayer():
         self.width = width
         prev_shape = prev_layer.output.shape
         self.num_of_input_layers = prev_shape[0]
-        self.output = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]])
+        self.output = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]], dtype=np.float32)
         self.weights = self.initialize_weights()
-        self.biases = np.zeros((self.weights.shape[0], 1, 1))
+        self.biases = np.zeros((self.weights.shape[0], 1, 1), dtype=np.float32)
         self.activation_func = lambda val, des: np.copyto(des, val)
         self.deriv_activation_func = lambda val, des: des.fill(1)
         # self.activation_func = relu
         # self.deriv_activation_func = deriv_of_relu
-        self.total_input = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]])
+        self.total_input = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]], dtype=np.float32)
         self.deriv_cache = ConvDerivativeCache(self)
 
     def initialize_weights(self):
@@ -31,7 +31,7 @@ class ConvolutionalLayer():
             self.prev_layer.output.shape[0],
             self.height,
             self.width
-        ])
+        ]).astype(np.float32)
 
     def forward_propagate(self):
         self.total_input *= 0
@@ -106,9 +106,9 @@ class ConvolutionalLayer():
         new_height = height + (1 if height % 2 == 0 else 0)
         new_width = width + (1 if width % 2 == 0 else 0)
         if height % 2 == 0:
-            weights = np.append(weights, np.zeros([1, width]), axis=0)
+            weights = np.append(weights, np.zeros([1, width]), axis=0, dtype=np.float32)
         if width % 2 == 0:
-            weights = np.append(weights, np.zeros([new_height, 1]), axis=1)
+            weights = np.append(weights, np.zeros([new_height, 1]), axis=1, dtype=np.float32)
         return weights
 
     def has_weights(self):

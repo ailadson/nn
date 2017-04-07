@@ -54,9 +54,9 @@ print(4 * ((observed - estimate) * -2).sum())
 #     new_width = width + (1 if width % 2 == 0 else 0)
 #     if height % 2 == 0:
 #
-#         weights = np.append(weights, np.zeros([1, width]), axis=0)
+#         weights = np.append(weights, np.zeros([1, width]), axis=0, dtype=np.float32)
 #     if width % 2 == 0:
-#         weights = np.append(weights, np.zeros([new_height, 1]), axis=1)
+#         weights = np.append(weights, np.zeros([new_height, 1]), axis=1, dtype=np.float32)
 #     return weights
 #
 # b = np.arange(1, 10).reshape([3, 3])

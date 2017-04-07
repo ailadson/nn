@@ -15,7 +15,7 @@ class SimpleTrainer:
             if not layer.has_weights():
                 weights_mats.append(None)
             else:
-                weights_mats.append( np.zeros(layer.weights.shape) )
+                weights_mats.append( np.zeros(layer.weights.shape) , dtype=np.float32)
         return weights_mats
 
     def init_bias_deriv_vecs(self):
@@ -24,7 +24,7 @@ class SimpleTrainer:
             if not layer.has_weights():
                 bias_vecs.append(None)
             else:
-                bias_vecs.append( np.zeros(layer.biases.shape) )
+                bias_vecs.append( np.zeros(layer.biases.shape) , dtype=np.float32)
         return bias_vecs
 
     def train_with_examples(self, examples):

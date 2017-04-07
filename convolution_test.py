@@ -7,9 +7,9 @@ HEIGHT = 28
 KSIZE = 3
 ITERS = 100000
 
-ipt = np.zeros([HEIGHT, WIDTH])
-des = np.zeros([HEIGHT, WIDTH])
-kernel = np.zeros([KSIZE, KSIZE])
+ipt = np.zeros([HEIGHT, WIDTH], dtype=np.float32)
+des = np.zeros([HEIGHT, WIDTH], dtype=np.float32)
+kernel = np.zeros([KSIZE, KSIZE], dtype=np.float32)
 
 t = time.time()
 for i in range(ITERS):

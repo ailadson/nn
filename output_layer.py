@@ -6,7 +6,7 @@ class OutputLayer(FullyConnectedLayer):
         super().__init__(prev_layer, num_units)
         self.observed_output = None
         self.true_class = None
-        self.logits = np.zeros(num_units)
+        self.logits = np.zeros(num_units, dtype=np.float32)
         self.activation_func = lambda val, des: np.copyto(des, val)
         self.deriv_activation_func = lambda val, des: des.fill(1)
 
@@ -23,6 +23,6 @@ class OutputLayer(FullyConnectedLayer):
         self.true_class = list(observed).index(1)
 
     def deriv_wrt_unit_outputs(self):
-        unit_outputs = np.zeros([self.num_units])
+        unit_outputs = np.zeros([self.num_units], dtype=np.float32)
         derivative_of_softmax_and_ce(self.logits, self.true_class, unit_outputs)
         return unit_outputs

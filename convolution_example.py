@@ -10,7 +10,7 @@ def c2d(img, conv, mode):
     img_height, img_width = img.shape
     k_height, k_width = conv.shape
     out_height, out_width = img_height - k_height + 1, img_width - k_width + 1
-    out = np.zeros([out_height, out_width])
+    out = np.zeros([out_height, out_width], dtype=np.float32)
 
     for i in range(out_height):
         for j in range(out_width):
@@ -42,7 +42,7 @@ sobely = np.array([
     [-1, -2, -1]
 ])
 
-# sobely = np.zeros([3,3])
+# sobely = np.zeros([3,3], dtype=np.float32)
 
 outx = c2d(data, sobelx, mode="valid")
 outy = c2d(data, sobely, mode="valid")

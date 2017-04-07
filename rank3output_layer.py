@@ -6,8 +6,8 @@ class Rank3OutputLayer():
     def __init__(self, prev_layer):
         self.prev_layer = prev_layer
         prev_layer.next_layer = self
-        self.weights = np.zeros(2)
-        self.total_input = np.zeros(2)
+        self.weights = np.zeros(2, dtype=np.float32)
+        self.total_input = np.zeros(2, dtype=np.float32)
         self.output = self.prev_layer.output
         self.observed_output = None
         self.deriv_cache = ConvDerivativeCache(self)

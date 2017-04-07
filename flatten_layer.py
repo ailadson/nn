@@ -7,7 +7,7 @@ class FlattenLayer():
         self.next_layer = None
         prev_layer.next_layer = self
         self.num_units = reduce(lambda acc, ele: acc * ele, self.prev_layer.output.shape)
-        self.output = np.zeros(self.num_units)
+        self.output = np.zeros(self.num_units, dtype=np.float32)
 
     def forward_propagate(self):
         self.output[:] = self.prev_layer.output.reshape(self.num_units)[:]

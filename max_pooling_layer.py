@@ -13,10 +13,10 @@ class MaxPoolingLayer():
         prev_layer.next_layer = self
         prev_shape = prev_layer.output.shape
         self.num_of_input_layers = prev_shape[0]
-        self.output = np.zeros([prev_shape[0], math.ceil(prev_shape[1]/2), math.ceil(prev_shape[2]/2)])
+        self.output = np.zeros([prev_shape[0], math.ceil(prev_shape[1]/2), math.ceil(prev_shape[2]/2)], dtype=np.float32)
         self.activation_func = lambda val, des: np.copyto(des, val)
         self.deriv_activation_func = lambda val, des: des.fill(1)
-        self.total_input = np.zeros(self.output.shape)
+        self.total_input = np.zeros(self.output.shape, dtype=np.float32)
         self.deriv_cache = MaxPoolDerivativeCache(self)
 
     def forward_propagate(self):

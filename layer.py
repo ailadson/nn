@@ -17,18 +17,18 @@ class FullyConnectedLayer:
         self.next_layer = None
         prev_layer.next_layer = self
         self.num_units = num_units
-        self.biases = np.zeros(num_units)
+        self.biases = np.zeros(num_units, dtype=np.float32)
         #weight col correspond to prev units. rows correspond to our units
         self.weights = self.generate_weight_mat()
-        self.output = np.zeros([num_units])
-        self.total_input = np.zeros([num_units])
+        self.output = np.zeros([num_units], dtype=np.float32)
+        self.total_input = np.zeros([num_units], dtype=np.float32)
         self.deriv_cache = DerivativeCache(self)
 
 
     def generate_weight_mat(self):
         self.w_bound = FullyConnectedLayer.w_bound(self.num_units, self.prev_layer.num_units)
         num_prev_units = self.prev_layer.num_units
-        return np.random.uniform(-self.w_bound, self.w_bound, [self.num_units, num_prev_units])
+        return np.random.uniform(-self.w_bound, self.w_bound, [self.num_units, num_prev_units]).astype(np.float32)
 
     def forward_propagate(self):
         self.weights.dot(self.prev_layer.output, out = self.total_input)
