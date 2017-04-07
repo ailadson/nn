@@ -1,6 +1,6 @@
 cimport cython
 cimport numpy as np
-cimport avx_convolve2d_py.main as avx_convolve2d_py
+cimport avx_convolve2d_py
 
 ctypedef np.float32_t DTYPE_t
 

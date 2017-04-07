@@ -13,3 +13,6 @@ a.out
 # other executable files
 convolution
 ned_convolution_test_avx
+
+pyx/*.c
+pyx/*.so

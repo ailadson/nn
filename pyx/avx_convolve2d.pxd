@@ -1,11 +1,11 @@
-cdef extern from "../avx_convolve2d.h":
+cdef extern from "avx_convolve2d.h":
     void convolve2d(float* input,
                     float* kernel,
                     float* destination,
                     shape_t image_shape,
                     shape_t kernel_shape) nogil;
 
-cdef extern from "../matrix.h":
+cdef extern from "matrix.h":
     ctypedef struct shape_t:
         size_t height
         size_t width
