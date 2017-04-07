@@ -110,12 +110,23 @@ void convolve1d(
 
       // Don't forget the folks at the ends!
       if (j > 0) {
+        float first_kernel_val = kernel[0];
+        if (dir == BACKWARD) {
+          first_kernel_val = kernel[2];
+        }
+
         destination_addr[0] += \
-          kernel[0] * mat_get(input, image_shape, i, j - 1);
+          first_kernel_val * mat_get(input, image_shape, i, j - 1);
       }
+
       if ((j+7) < (image_shape.width - 1)) {
+        float last_kernel_val = kernel[2];
+        if (dir == BACKWARD) {
+          last_kernel_val = kernel[0];
+        }
+
         destination_addr[7] += \
-          kernel[2] * mat_get(input, image_shape, i, j + 8);
+          last_kernel_val * mat_get(input, image_shape, i, j + 8);
       }
     }
   }
@@ -140,10 +151,8 @@ void convolve2d_(
   }
 
   for (size_t i = 0; i < kernel_shape.height; i++) {
-    size_t kernel_row_offset;
-    if (dir == FORWARD) {
-       kernel_row_offset = i - mid_i;
-    } else if (dir == BACKWARD) {
+    size_t kernel_row_offset = i - mid_i;
+    if (dir == BACKWARD) {
       kernel_row_offset = mid_i - i;
     }
 
