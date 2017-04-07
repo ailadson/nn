@@ -9,3 +9,8 @@ cdef void avx_convolve2d_(
     np.float32_t[:, :] ipt,
     np.float32_t[:, :] kernel,
     np.float32_t[:, :] destination) nogil
+
+cdef void avx_backward_convolve2d_(
+    np.float32_t[:, :] ipt,
+    np.float32_t[:, :] kernel,
+    np.float32_t[:, :] destination) nogil
