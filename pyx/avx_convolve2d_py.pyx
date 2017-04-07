@@ -1,4 +1,5 @@
 from avx_convolve2d cimport *
+cimport cython
 cimport numpy as np
 
 cdef struct Result:
@@ -33,6 +34,7 @@ def run_test():
     result = run_test_()
     return (result.a0, result.a1, result.a2, result.a3)
 
+@cython.boundscheck(False)
 cdef void avx_convolve2d_(
     np.float32_t[:, :] ipt,
     np.float32_t[:, :] kernel,
@@ -46,6 +48,27 @@ cdef void avx_convolve2d_(
     kernel_shape.width = kernel.shape[1]
 
     convolve2d(
+        &ipt[0, 0],
+        &kernel[0, 0],
+        &destination[0, 0],
+        image_shape,
+        kernel_shape
+    )
+
+@cython.boundscheck(False)
+cdef void avx_backward_convolve2d_(
+    np.float32_t[:, :] ipt,
+    np.float32_t[:, :] kernel,
+    np.float32_t[:, :] destination) nogil:
+
+    cdef shape_t image_shape
+    image_shape.height = ipt.shape[0]
+    image_shape.width = ipt.shape[1]
+    cdef shape_t kernel_shape
+    kernel_shape.height = kernel.shape[0]
+    kernel_shape.width = kernel.shape[1]
+
+    backward_convolve2d(
         &ipt[0, 0],
         &kernel[0, 0],
         &destination[0, 0],

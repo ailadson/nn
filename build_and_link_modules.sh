@@ -9,7 +9,7 @@ cd ..
 
 # Then build Cython modules
 cd pyx
-python setup.py build_ext --inplace
+./build.sh
 cd ..
 
 # Then link C modules and avx_convolve2d_py together.

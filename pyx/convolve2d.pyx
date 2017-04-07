@@ -93,9 +93,13 @@ def apply_convolution(
     for output_layer_idx in range(num_output_layers):
         for input_layer_idx in range(num_input_layers):
             input_layer = input_layers[input_layer_idx]
-            kernel_layer = kernel_layers[output_layer_idx, input_layer_idx]
+            kernel_layer = (
+                kernel_layers[output_layer_idx, input_layer_idx]
+            )
             output_layer = output_layers[output_layer_idx]
-            avx_convolve2d_py.avx_convolve2d_(input_layer, kernel_layer, output_layer)
+            avx_convolve2d_py.avx_convolve2d_(
+                input_layer, kernel_layer, output_layer
+            )
 
 def apply_backwards_convolution(
         DTYPE_t[:, :, :] deriv_wrt_total_inputs,
@@ -110,10 +114,12 @@ def apply_backwards_convolution(
     for output_layer_idx in range(num_output_layers):
         for input_layer_idx in range(num_input_layers):
             total_input_layer = deriv_wrt_total_inputs[output_layer_idx]
-            kernel_layer = kernel_layers[output_layer_idx, input_layer_idx]
+            kernel_layer = (
+                kernel_layers[output_layer_idx, input_layer_idx]
+            )
             prev_output_layer = deriv_wrt_prev_outputs[input_layer_idx]
 
-            backward_convolve2d_(
+            avx_convolve2d_py.backward_convolve2d_(
                 total_input_layer,
                 kernel_layer,
                 prev_output_layer

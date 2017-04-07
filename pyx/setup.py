@@ -16,5 +16,3 @@ setup(
         extension("avx_convolve2d_py"),
     ])
 )
-
-# python setup.py build_ext --inplace
