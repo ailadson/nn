@@ -1,10 +1,9 @@
-from functions import *
 from deriv_cache import MaxPoolDerivativeCache
-from max_pooling_functions import *
-import skimage.measure
-import numpy as np
+from functions import *
 import math
-
+import numpy as np
+import pyx.max_pooling_functions
+import skimage.measure
 
 class MaxPoolingLayer():
     def __init__(self, prev_layer):
@@ -85,7 +84,7 @@ class MaxPoolingLayer():
 
 
     def apply_pooling(self, ipt, des):
-        apply_max_pooling(ipt, des)
+        pyx.max_pooling_functions.apply_max_pooling(ipt, des)
 
     def has_weights(self):
         return False

@@ -1,10 +1,8 @@
-from convolve2d import convolve2d as c2d, apply_convolution, apply_backwards_convolution
-#from scipy.signal import convolve2d as c2d
-import numpy as np
-from functions import *
+import pyx.deconvolve2d
 from deriv_cache import ConvDerivativeCache
-from deconvolve2d import deconvolve2d, deriv_wrt_weights
-
+from functions import *
+import numpy as np
+import pyx.convolve2d
 
 class ConvolutionalLayer():
     def __init__(self, prev_layer, height, width, num_of_output_layers):
@@ -60,7 +58,7 @@ class ConvolutionalLayer():
 
         self.deriv_cache.weights.fill(0.0)
         # TODO: we don't do anything to update the biases!
-        deriv_wrt_weights(
+        pyx.deconvolve2d.deriv_wrt_weights(
             self.prev_layer.output,
             self.deriv_cache.weights,
             self.deriv_wrt_unit_total_inputs()
@@ -92,14 +90,14 @@ class ConvolutionalLayer():
         return self.deriv_cache.prev_outputs
 
     def apply_backwards_convolution(self, deriv_wrt_total_inputs, deriv_wrt_prev_outputs):
-        apply_backwards_convolution(
+        pyx.convolve2d.apply_backwards_convolution(
             deriv_wrt_total_inputs,
             self.weights,
             deriv_wrt_prev_outputs
         )
 
     def apply_convolution(self, ipt, des):
-        apply_convolution(ipt, self.weights, des)
+        pyx.convolve2d.apply_convolution(ipt, self.weights, des)
 
     def pad_flipped_weights(weights):
         height, width = weights.shape
