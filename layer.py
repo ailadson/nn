@@ -18,7 +18,8 @@ class FullyConnectedLayer:
         prev_layer.next_layer = self
         self.num_units = num_units
         self.biases = np.zeros(num_units, dtype=np.float32)
-        #weight col correspond to prev units. rows correspond to our units
+        # weight col correspond to prev units. rows correspond to our
+        # units
         self.weights = self.generate_weight_mat()
         self.output = np.zeros([num_units], dtype=np.float32)
         self.total_input = np.zeros([num_units], dtype=np.float32)
@@ -26,9 +27,13 @@ class FullyConnectedLayer:
 
 
     def generate_weight_mat(self):
-        self.w_bound = FullyConnectedLayer.w_bound(self.num_units, self.prev_layer.num_units)
+        self.w_bound = FullyConnectedLayer.w_bound(
+            self.num_units, self.prev_layer.num_units
+        )
         num_prev_units = self.prev_layer.num_units
-        return np.random.uniform(-self.w_bound, self.w_bound, [self.num_units, num_prev_units]).astype(np.float32)
+        return np.random.uniform(
+            -self.w_bound, self.w_bound, [self.num_units, num_prev_units]
+        ).astype(np.float32)
 
     def forward_propagate(self):
         self.weights.dot(self.prev_layer.output, out = self.total_input)
@@ -56,7 +61,10 @@ class FullyConnectedLayer:
 
         deriv_wrt_unit_total_inputs = self.deriv_wrt_unit_total_inputs()
         t_weights = self.weights.transpose()
-        t_weights.dot(deriv_wrt_unit_total_inputs, out = self.deriv_cache.prev_outputs)
+        t_weights.dot(
+            deriv_wrt_unit_total_inputs,
+            out = self.deriv_cache.prev_outputs
+        )
         self.deriv_cache.set('prev_outputs')
         return self.deriv_cache.prev_outputs
 
@@ -64,7 +72,9 @@ class FullyConnectedLayer:
         if self.deriv_cache.is_set("unit_total_inputs"):
             return self.deriv_cache.unit_total_inputs
 
-        self.deriv_activation_func(self.total_input, self.deriv_cache.unit_total_inputs)
+        self.deriv_activation_func(
+            self.total_input, self.deriv_cache.unit_total_inputs
+        )
         self.deriv_cache.unit_total_inputs *= self.deriv_wrt_unit_outputs()
 
         return self.deriv_cache.unit_total_inputs
@@ -74,7 +84,11 @@ class FullyConnectedLayer:
             return self.deriv_cache.weights
 
         deriv_wrt_unit_inputs = self.deriv_wrt_unit_total_inputs()
-        np.outer(deriv_wrt_unit_inputs, self.prev_layer.output, self.deriv_cache.weights)
+        np.outer(
+            deriv_wrt_unit_inputs,
+            self.prev_layer.output,
+            self.deriv_cache.weights
+        )
         return self.deriv_cache.weights
 
     def has_weights(self):
