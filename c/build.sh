@@ -2,7 +2,15 @@
 
 set -e
 
-GCC=gcc-6
+unamestr=`uname`
+if [[ "$unamestr" == "Darwin" ]]; then
+    GCC=gcc-6
+elif [[ "$unamestr" == "Linux" ]]; then
+    GCC=gcc
+else
+    exit 1
+fi
+
 W_FLAGS="-Wall -Wextra -Werror"
 
 $GCC -std=c11 -mavx -mavx2 -O3 $W_FLAGS -fPIC -c avx_convolve2d.c
