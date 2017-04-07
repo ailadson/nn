@@ -2,7 +2,7 @@ import pyx.deconvolve2d
 from deriv_cache import ConvDerivativeCache
 from functions import *
 import numpy as np
-import pyx.convolve2d
+import pyx.avx_convolve2d
 
 class ConvolutionalLayer():
     def __init__(self, prev_layer, height, width, num_of_output_layers):
@@ -97,14 +97,14 @@ class ConvolutionalLayer():
             deriv_wrt_total_inputs,
             deriv_wrt_prev_outputs):
 
-        pyx.convolve2d.apply_backward_convolution(
+        pyx.avx_convolve2d.apply_backward_convolution(
             deriv_wrt_total_inputs,
             self.weights,
             deriv_wrt_prev_outputs
         )
 
     def apply_convolution(self, ipt, des):
-        pyx.convolve2d.apply_convolution(ipt, self.weights, des)
+        pyx.avx_convolve2d.apply_convolution(ipt, self.weights, des)
 
     def has_weights(self):
         return True

@@ -1,4 +1,4 @@
-import pyx.convolve2d as convolve2d
+import pyx.avx_convolve2d as convolve2d
 import pyx.deconvolve2d as deconvolve2d
 import numpy as np
 import time
