@@ -53,6 +53,20 @@ def expected_fancy_kernel_output():
 
     return y
 
+def make_simple_asym_kernel():
+    k = np.zeros((1, 1, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
+    k[0, 0, 0, 0] = 1.0
+    return k
+
+def expected_simple_backward_conv_output():
+    y = np.zeros((1, IMG_DIM, IMG_DIM)).astype(np.float32)
+    for (i, j) in product(range(IMG_DIM), range(IMG_DIM)):
+        if i == IMG_DIM - 1 or j == IMG_DIM - 1:
+            continue
+        y[0, i, j] = (i + 1) + (j + 1)
+    return y
+
+
 def test_identity_kernel():
     x = make_test_input()
     k = make_identity_kernel()
@@ -69,5 +83,14 @@ def test_fancy_kernel():
     assert (y == expected_fancy_kernel_output()).all()
     print("Fancy kernel test passed!")
 
+def test_backward_convolve():
+    x = make_test_input()
+    k = make_simple_asym_kernel()
+    y = make_empty_output()
+    convolve2d.apply_backward_convolution(x, k, y)
+    assert (y == expected_simple_backward_conv_output()).all()
+    print("Backward kernel test passed!")
+
 test_identity_kernel()
 test_fancy_kernel()
+test_backward_convolve()

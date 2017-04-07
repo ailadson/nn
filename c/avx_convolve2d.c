@@ -140,7 +140,13 @@ void convolve2d_(
   }
 
   for (size_t i = 0; i < kernel_shape.height; i++) {
-    size_t kernel_row_offset = i - mid_i;
+    size_t kernel_row_offset;
+    if (dir == FORWARD) {
+       kernel_row_offset = i - mid_i;
+    } else if (dir == BACKWARD) {
+      kernel_row_offset = mid_i - i;
+    }
+
     convolve1d(input,
                mat_offset(kernel, kernel_shape, i, 0),
                destination,
