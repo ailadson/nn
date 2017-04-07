@@ -23,9 +23,9 @@ cdef void apply_convolution_(
     cdef int output_layer_idx
     cdef int num_output_layers = output_tensor.shape.dim0
 
-    cdef float* input_layer
-    cdef float* kernel_layer
-    cdef float* output_layer
+    cdef Rank2Tensor input_layer
+    cdef Rank2Tensor kernel_layer
+    cdef Rank2Tensor output_layer
 
     cdef avx_impl.shape_t image_shape
     image_shape.height = input_tensor.shape.dim1
@@ -44,17 +44,17 @@ cdef void apply_convolution_(
 
             if (direction == FORWARD):
                 avx_impl.convolve2d(
-                    input_layer,
-                    kernel_layer,
-                    output_layer,
+                    input_layer.data,
+                    kernel_layer.data,
+                    output_layer.data,
                     image_shape,
                     kernel_shape
                 )
             else:
                 avx_impl.backward_convolve2d(
-                    input_layer,
-                    kernel_layer,
-                    output_layer,
+                    input_layer.data,
+                    kernel_layer.data,
+                    output_layer.data,
                     image_shape,
                     kernel_shape
                 )
