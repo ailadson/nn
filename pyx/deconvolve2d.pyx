@@ -98,7 +98,7 @@ def deconvolve2d(
 
     deconvolve2d_(ipt, error, deriv_filter)
 
-def deriv_wrt_weights(
+cdef deriv_wrt_weights_(
         DTYPE_t[:, :, :] input_layers,
         DTYPE_t[:, :, :, :] deriv_wrt_weights,
         DTYPE_t[:, :, :] deriv_wrt_unit_total_inputs):
@@ -122,3 +122,14 @@ def deriv_wrt_weights(
                 deriv_wrt_unit_total_inputs_layer,
                 deriv_wrt_weights_layer
             )
+
+def deriv_wrt_weights(
+        DTYPE_t[:, :, :] input_layers,
+        DTYPE_t[:, :, :, :] deriv_wrt_weights,
+        DTYPE_t[:, :, :] deriv_wrt_unit_total_inputs):
+
+    deriv_wrt_weights_(
+        input_layers,
+        deriv_wrt_weights,
+        deriv_wrt_unit_total_inputs
+    )
