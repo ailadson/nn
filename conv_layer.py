@@ -13,14 +13,22 @@ class ConvolutionalLayer():
         self.width = width
         prev_shape = prev_layer.output.shape
         self.num_of_input_layers = prev_shape[0]
-        self.output = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]], dtype=np.float32)
+        output_shape = [
+            num_of_output_layers, prev_shape[1], prev_shape[2]
+        ]
+        self.output = np.zeros(output_shape, dtype=np.float32)
         self.weights = self.initialize_weights()
-        self.biases = np.zeros((self.weights.shape[0], 1, 1), dtype=np.float32)
+        self.biases = np.zeros(
+            (self.weights.shape[0], 1, 1), dtype=np.float32
+        )
         self.activation_func = lambda val, des: np.copyto(des, val)
         self.deriv_activation_func = lambda val, des: des.fill(1)
         # self.activation_func = relu
         # self.deriv_activation_func = deriv_of_relu
-        self.total_input = np.zeros([num_of_output_layers, prev_shape[1], prev_shape[2]], dtype=np.float32)
+        total_input_shape = [
+            num_of_output_layers, prev_shape[1], prev_shape[2]
+        ]
+        self.total_input = np.zeros(total_input_shape, dtype=np.float32)
         self.deriv_cache = ConvDerivativeCache(self)
 
     def initialize_weights(self):
@@ -43,15 +51,6 @@ class ConvolutionalLayer():
         # print("Print Derivative Weights")
         # print(self.deriv_cache.weights)
 
-    # def regularized_deriv_wrt_weights(self):
-    #     deriv_wrt_weights = self.deriv_wrt_weights_()
-    #     deriv_wrt_weights += (20 * np.abs(self.weights))
-    #     deriv_wrt_weights[0, 0, 1, 1] -= (20 * np.abs(self.weights[0, 0, 1, 1]))
-    #     return deriv_wrt_weights
-
-    # def deriv_wrt_weights(self):
-    #     return self.deriv_wrt_weights_()
-
     def deriv_wrt_weights(self):
         if self.deriv_cache.is_set("weights"):
             return self.deriv_cache.weights
@@ -70,8 +69,12 @@ class ConvolutionalLayer():
         if self.deriv_cache.is_set("unit_total_inputs"):
             return self.deriv_cache.unit_total_inputs
 
-        self.deriv_activation_func(self.total_input, self.deriv_cache.unit_total_inputs)
-        self.deriv_cache.unit_total_inputs *= self.deriv_wrt_unit_outputs()
+        self.deriv_activation_func(
+            self.total_input, self.deriv_cache.unit_total_inputs
+        )
+        self.deriv_cache.unit_total_inputs *= (
+            self.deriv_wrt_unit_outputs()
+        )
 
         return self.deriv_cache.unit_total_inputs
 
@@ -102,16 +105,6 @@ class ConvolutionalLayer():
 
     def apply_convolution(self, ipt, des):
         pyx.convolve2d.apply_convolution(ipt, self.weights, des)
-
-    def pad_flipped_weights(weights):
-        height, width = weights.shape
-        new_height = height + (1 if height % 2 == 0 else 0)
-        new_width = width + (1 if width % 2 == 0 else 0)
-        if height % 2 == 0:
-            weights = np.append(weights, np.zeros([1, width]), axis=0, dtype=np.float32)
-        if width % 2 == 0:
-            weights = np.append(weights, np.zeros([new_height, 1]), axis=1, dtype=np.float32)
-        return weights
 
     def has_weights(self):
         return True
