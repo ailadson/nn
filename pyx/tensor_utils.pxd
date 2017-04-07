@@ -34,7 +34,7 @@ cdef inline DTYPE_t rank2_get(Rank2Tensor t, size_t i, size_t j) nogil:
 
 cdef inline void rank2_inc(
     Rank2Tensor t, size_t i, size_t j, DTYPE_t val) nogil:
-    (t.data + (i * t.shape.dim0) + j)[0] = val
+    (t.data + (i * t.shape.dim0) + j)[0] += val
 
 # Helpers for calculation of offsets.
 cdef inline Rank2Tensor rank3_offset(
