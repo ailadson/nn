@@ -63,9 +63,10 @@ train_observations = list(zip(reshape_images(mnist.train.images), mnist.train.la
 
 nn2 = Net()
 nn2.add_rank3_input_layer((1, 28, 28))
-nn2.add_conv_layer(3,3,20)
+nn2.add_conv_layer(3, 3, 20)
 nn2.add_max_pool_layer()
-nn2.add_conv_layer(5,5,40)
+#nn2.add_conv_layer(5,5,40)
+nn2.add_conv_layer(3, 3, 40)
 nn2.add_max_pool_layer()
 nn2.add_flatten_layer()
 nn2.add_fc_layer(100)
