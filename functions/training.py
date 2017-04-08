@@ -1,6 +1,7 @@
 import config
 import random
 from functions import *
+from tensorflow.examples.tutorials.mnist import input_data
 
 def batch_data(observations, num_size):
     random.shuffle(observations)
@@ -30,6 +31,15 @@ def evaluate(observations, net):
     avg_loss = loss_sum / num_observations
     misclassification_rate = misclassification / num_observations
     return (avg_loss, misclassification_rate)
+
+def get_mnist_data():
+    mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+
+    test = list(zip(reshape_images(mnist.test.images), mnist.test.labels))
+    validation = list(zip(reshape_images(mnist.validation.images), mnist.validation.labels))
+    train = list(zip(reshape_images(mnist.train.images), mnist.train.labels))
+
+    return (test, validation, training)
 
 def reshape_images(images):
     return images.reshape([-1, 1, 28, 28])
