@@ -12,6 +12,18 @@ def make_test_input():
 
     return x
 
+def make_multi_channel_input(num_channels):
+    x = np.zeros((num_channels, IMG_DIM, IMG_DIM)).astype(np.float32)
+
+    for (k, i, j) in product(range(num_channels), range(IMG_DIM), range(IMG_DIM)):
+        x[k, i, j] = k + i + j
+
+    return x
+
+def make_blank_multi_channel_input(num_channels):
+    x = np.zeros((num_channels, IMG_DIM, IMG_DIM)).astype(np.float32)
+    return x
+
 KERNEL_DIM = 3
 def make_identity_kernel():
     k = np.zeros((1, 1, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
@@ -20,6 +32,15 @@ def make_identity_kernel():
 
 def make_blank_kernel():
     k = np.zeros((1, 1, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
+    return k
+
+def make_nd_kernel(num_of_dim):
+    k = np.zeros((1, num_of_dim, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
+    k[0, 0, 1, 1] = 1.0
+    k[0, 1, 0, 0] = 1.0
+    k[0, 1, 0, 2] = 1.0
+    k[0, 1, 2, 0] = 1.0
+    k[0, 1, 2, 2] = 1.0
     return k
 
 def make_fancy_kernel():
@@ -119,7 +140,20 @@ def test_deconvolve():
     assert (k == expected_k).all()
     print("Deconvolve2d test passed!")
 
+def test_multi_channel_input_convolve():
+    x = make_multi_channel_input(3)
+    k = make_nd_kernel(3)
+    y = make_blank_multi_channel_input(1)
+
+    convolve2d.apply_convolution(x, k, y)
+    print(x)
+    print("~"*80)
+    print(k)
+    print("~"*80)
+    print(y)
+
 test_identity_kernel()
 test_fancy_kernel()
 test_backward_convolve()
 test_deconvolve()
+test_multi_channel_input_convolve()
