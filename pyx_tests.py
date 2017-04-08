@@ -2,6 +2,7 @@ from itertools import *
 import numpy as np
 import pyx.avx_convolve2d as convolve2d
 import pyx.deconvolve2d as deconvolve2d
+import pyx.max_pooling_functions as max_pooling_functions
 
 IMG_DIM = 16
 def make_test_input():
@@ -49,8 +50,8 @@ def make_fancy_kernel():
     k[0, 0, 1, 1] = 0.0
     return k
 
-def make_empty_output():
-    y = np.zeros((1, IMG_DIM, IMG_DIM)).astype(np.float32)
+def make_empty_output(dim = IMG_DIM):
+    y = np.zeros((1, dim, dim)).astype(np.float32)
     return y
 
 def expected_fancy_kernel_output():
@@ -152,8 +153,22 @@ def test_multi_channel_input_convolve():
     print("~"*80)
     print(y)
 
+HALF_DIM = IMG_DIM // 2
+def test_apply_max_pooling():
+    x = make_test_input()
+    y = make_empty_output(HALF_DIM)
+    max_pooling_functions.apply_max_pooling(x, y)
+
+    expected_result = make_empty_output(HALF_DIM)
+    for (i, j) in product(range(HALF_DIM), range(HALF_DIM)):
+        expected_result[0, i, j] = (2*i + 1) + (2*j + 1)
+
+    assert (y == expected_result).all()
+    print("apply_max_pooling test passed!")
+
 test_identity_kernel()
 test_fancy_kernel()
 test_backward_convolve()
 test_deconvolve()
 test_multi_channel_input_convolve()
+test_apply_max_pooling()

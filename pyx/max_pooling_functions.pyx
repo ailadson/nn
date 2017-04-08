@@ -71,8 +71,8 @@ cdef void perform(
         max_pair.j = j
         max_val[0] = channels[channel_idx, i, j]
 
-# One fn.
-# Looks at each sell as in getpoolingvalues. Keeps track of max seen so far and its pos.
+# One fn. Looks at each sell as in getpoolingvalues. Keeps track of
+# max seen so far and its pos.
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void get_local_max_and_pos(
@@ -93,7 +93,15 @@ cdef void get_local_max_and_pos(
 
     perform(good_j, channels, channel_idx, i, j + 1, max_pair, &max_val)
     perform(good_i, channels, channel_idx, i + 1, j, max_pair, &max_val)
-    perform(good_i & good_j, channels, channel_idx, i + 1, j + 1, max_pair, &max_val)
+    perform(
+        good_i & good_j,
+        channels,
+        channel_idx,
+        i + 1,
+        j + 1,
+        max_pair,
+        &max_val
+    )
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
