@@ -7,6 +7,7 @@ ctypedef np.float32_t DTYPE_t
 cdef struct s_int_pair:
     int i
     int j
+    DTYPE_t val
 
 def back_propagate_channels(
         deriv_wrt_prev_outputs,
@@ -63,13 +64,13 @@ cdef void perform(
     int channel_idx,
     int i,
     int j,
-    s_int_pair* max_pair,
-    DTYPE_t* max_val) nogil:
+    s_int_pair* max_pair) nogil:
 
-    if good and channels[channel_idx, i, j] > max_val[0]:
+    cdef DTYPE_t val = channels[channel_idx, i, j]
+    if good and val > max_pair.val:
         max_pair.i = i
         max_pair.j = j
-        max_val[0] = channels[channel_idx, i, j]
+        max_pair.val = val
 
 # One fn. Looks at each sell as in getpoolingvalues. Keeps track of
 # max seen so far and its pos.
@@ -86,21 +87,20 @@ cdef void get_local_max_and_pos(
     cdef int j = block_j * 2
     cdef int good_i = (i + 1 < channels.shape[1])
     cdef int good_j = (j + 1 < channels.shape[2])
-    cdef DTYPE_t max_val = channels[channel_idx, i, j]
 
-    (max_pair).i = i
-    (max_pair).j = j
+    max_pair.i = i
+    max_pair.j = j
+    max_pair.val = channels[channel_idx, i, j]
 
-    perform(good_j, channels, channel_idx, i, j + 1, max_pair, &max_val)
-    perform(good_i, channels, channel_idx, i + 1, j, max_pair, &max_val)
+    perform(good_j, channels, channel_idx, i, j + 1, max_pair)
+    perform(good_i, channels, channel_idx, i + 1, j, max_pair)
     perform(
-        good_i & good_j,
+        good_i and good_j,
         channels,
         channel_idx,
         i + 1,
         j + 1,
-        max_pair,
-        &max_val
+        max_pair
     )
 
 @cython.boundscheck(False)

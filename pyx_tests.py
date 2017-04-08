@@ -5,10 +5,10 @@ import pyx.deconvolve2d as deconvolve2d
 import pyx.max_pooling_functions as max_pooling_functions
 
 IMG_DIM = 16
-def make_test_input():
-    x = np.zeros((1, IMG_DIM, IMG_DIM)).astype(np.float32)
+def make_test_input(dim = IMG_DIM):
+    x = np.zeros((1, dim, dim)).astype(np.float32)
 
-    for (i, j) in product(range(IMG_DIM), range(IMG_DIM)):
+    for (i, j) in product(range(dim), range(dim)):
         x[0, i, j] = i + j
 
     return x
@@ -166,9 +166,28 @@ def test_apply_max_pooling():
     assert (y == expected_result).all()
     print("apply_max_pooling test passed!")
 
+def test_back_propagate_channels():
+    deriv_wrt_prev_outputs = make_empty_output()
+    prev_channels = make_test_input()
+    deriv_wrt_unit_outputs = make_test_input(HALF_DIM) * 10
+    max_pooling_functions.back_propagate_channels(
+        deriv_wrt_prev_outputs,
+        prev_channels,
+        deriv_wrt_unit_outputs
+    )
+
+    expected_result = np.zeros((1, IMG_DIM, IMG_DIM))
+    for (i, j) in product(range(IMG_DIM), range(IMG_DIM)):
+        if (i % 2 == 0) or (j % 2 == 0): continue
+        expected_result[0, i, j] = 10 * (i // 2 + j // 2)
+
+    assert (deriv_wrt_prev_outputs == expected_result).all()
+    print("back_propagate_channel test passed!")
+
 test_identity_kernel()
 test_fancy_kernel()
 test_backward_convolve()
 test_deconvolve()
 test_multi_channel_input_convolve()
 test_apply_max_pooling()
+test_back_propagate_channels()
