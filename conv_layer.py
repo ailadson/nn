@@ -21,10 +21,10 @@ class ConvolutionalLayer():
         self.biases = np.zeros(
             (self.weights.shape[0], 1, 1), dtype=np.float32
         )
-        self.activation_func = lambda val, des: np.copyto(des, val)
-        self.deriv_activation_func = lambda val, des: des.fill(1)
-        # self.activation_func = relu
-        # self.deriv_activation_func = deriv_of_relu
+        # self.activation_func = lambda val, des: np.copyto(des, val)
+        # self.deriv_activation_func = lambda val, des: des.fill(1)
+        self.activation_func = relu
+        self.deriv_activation_func = deriv_of_relu
         total_input_shape = [
             num_of_output_layers, prev_shape[1], prev_shape[2]
         ]
@@ -32,7 +32,7 @@ class ConvolutionalLayer():
         self.deriv_cache = ConvDerivativeCache(self)
 
     def initialize_weights(self):
-        return np.random.uniform(0, 1, [
+        return np.random.uniform(-1, 1, [
             self.output.shape[0],
             self.prev_layer.output.shape[0],
             self.height,
