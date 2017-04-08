@@ -10,7 +10,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 
 def reshape_images(images):
-    return images.reshape([-1, 1, 28, 28])
+    return ((images.reshape([-1, 1, 28, 28]) / 255) - 0.5) * 2
 
 def train_epoch(nn, t, epoch_num, training_set, validation_set):
     print(f"Epoch number {epoch_num}")
@@ -24,14 +24,12 @@ def train_epoch(nn, t, epoch_num, training_set, validation_set):
         batch_d = t.train_with_examples(batch)
         # total_batch_loss += batch_d[0]
         # total_batch_misclassification += batch_d[1]
-        if (i + 1) % 100 == 0:
+        if (i + 1) % 1000 == 0:
             print(time.time() - last_time)
             print(f"Batch {i + 1} of {len(batches)}")
             last_time = time.time()
-
-        if i > 500: return
-            # loss, misclassification = evaluate(validation_set, nn)
-            # print((loss, misclassification))
+            loss, misclassification = evaluate(validation_set, nn)
+            print((loss, misclassification))
 
     # loss, misclassification = evaluate(validation_set, nn)
 
@@ -63,13 +61,13 @@ train_observations = list(zip(reshape_images(mnist.train.images), mnist.train.la
 
 nn2 = Net()
 nn2.add_rank3_input_layer((1, 28, 28))
-nn2.add_conv_layer(3, 3, 20)
-nn2.add_max_pool_layer()
-#nn2.add_conv_layer(5,5,40)
-nn2.add_conv_layer(3, 3, 40)
-nn2.add_max_pool_layer()
+# nn2.add_conv_layer(3, 3, 20)
+# nn2.add_max_pool_layer()
+# #nn2.add_conv_layer(5,5,40)
+# nn2.add_conv_layer(3, 3, 1)
+# nn2.add_max_pool_layer()
 nn2.add_flatten_layer()
-nn2.add_fc_layer(100)
+# nn2.add_fc_layer(100)
 nn2.add_output_layer(10)
 #
 t2 = Trainer(nn2, 0.001)
@@ -79,7 +77,7 @@ pr = cProfile.Profile()
 pr.enable()
 
 try:
-    for i in range(1):
+    for i in range(100):
         train_epoch(nn2, t2, i, train_observations, validation_observations)
 except BaseException as err:
     pr.disable()

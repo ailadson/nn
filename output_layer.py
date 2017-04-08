@@ -12,7 +12,9 @@ class OutputLayer(FullyConnectedLayer):
 
     def forward_propagate(self):
         super().forward_propagate()
-        # outputs is in logits. make greatest value 0
+        # before turning output into probs from logits, make the largest logit 0
+        # this avoids overflow
+        # print(self.output)
         self.output -= max(self.output)
         # before softmax, hold on to logits
         np.copyto(self.logits , self.output)
