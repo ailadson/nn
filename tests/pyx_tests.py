@@ -4,7 +4,7 @@ import pyx.avx_convolve2d as convolve2d
 import pyx.deconvolve2d as deconvolve2d
 import pyx.max_pooling_functions as max_pooling_functions
 
-IMG_DIM = 16
+IMG_DIM = 28
 def make_test_input(dim = IMG_DIM):
     x = np.zeros((1, dim, dim)).astype(np.float32)
 
@@ -13,16 +13,16 @@ def make_test_input(dim = IMG_DIM):
 
     return x
 
-def make_multi_channel_input(num_channels):
-    x = np.zeros((num_channels, IMG_DIM, IMG_DIM)).astype(np.float32)
+def make_multi_channel_input(num_channels, dim = IMG_DIM):
+    x = np.zeros((num_channels, dim, dim)).astype(np.float32)
 
-    for (k, i, j) in product(range(num_channels), range(IMG_DIM), range(IMG_DIM)):
+    for (k, i, j) in product(range(num_channels), range(dim), range(dim)):
         x[k, i, j] = k + i + j
 
     return x
 
-def make_blank_multi_channel_input(num_channels):
-    x = np.zeros((num_channels, IMG_DIM, IMG_DIM)).astype(np.float32)
+def make_blank_multi_channel_input(num_channels, dim = IMG_DIM):
+    x = np.zeros((num_channels, dim, dim)).astype(np.float32)
     return x
 
 KERNEL_DIM = 3
@@ -53,6 +53,11 @@ def make_fancy_kernel():
 def make_empty_output(dim = IMG_DIM):
     y = np.zeros((1, dim, dim)).astype(np.float32)
     return y
+
+def make_multi_channel_input_expected_output():
+    return np.array([[[3.,  7., 5.],
+                      [7., 14., 9.],
+                      [5.,  9., 7.]]])
 
 def expected_fancy_kernel_output():
     y = np.zeros((1, IMG_DIM, IMG_DIM)).astype(np.float32)
@@ -142,16 +147,15 @@ def test_deconvolve():
     print("Deconvolve2d test passed!")
 
 def test_multi_channel_input_convolve():
-    x = make_multi_channel_input(3)
+    x = make_multi_channel_input(3, 3)
     k = make_nd_kernel(3)
-    y = make_blank_multi_channel_input(1)
+    y = make_blank_multi_channel_input(1, 3)
 
     convolve2d.apply_convolution(x, k, y)
-    print(x)
-    print("~"*80)
-    print(k)
-    print("~"*80)
-    print(y)
+    expected_result = make_multi_channel_input_expected_output()
+
+    assert (y == expected_result).all()
+    print("Multichannel Input passed!")
 
 HALF_DIM = IMG_DIM // 2
 def test_apply_max_pooling():
