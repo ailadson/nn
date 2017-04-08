@@ -14,7 +14,7 @@ def sigmoid(source, des = None):
 def tanh(source, des = None):
     return np.tanh(source, out = des)
 
-def deriv_tanh(z, des = None):
+def derivative_of_tanh(z, des = None):
     if isinstance(z, np.ndarray):
         tanh(z, des)
         des *= des
@@ -67,7 +67,7 @@ def derivative_of_ce(estimated_prob_pos, observation):
     else:
         return 1/(1 - estimated_prob_pos)
 
-def derivative_of_sig(z, des = None):
+def derivative_of_sigmoid(z, des = None):
     if isinstance(z, np.ndarray):
         temp = np.copy(z)
         sigmoid(z, des)
@@ -114,7 +114,7 @@ def relu(values, des = None):
     else:
         return np.maximum(values, 0)
 
-def deriv_of_relu(values, des = None):
+def derivative_of_relu(values, des = None):
     if des is not None:
         des.fill(1)
         des *= (values > 0)
