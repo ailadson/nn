@@ -1,3 +1,4 @@
+import config
 from deriv_cache import DerivativeCache
 from functions import *
 from itertools import product
@@ -8,9 +9,9 @@ from random import uniform
 
 class FullyConnectedLayer(Layer):
     def __init__(self, prev_layer, num_units, activation_func_name):
-        super.Layer.__init__(prev_layer, num_units, activation_func_name)
-        self.biases = np.zeros(num_units, dtype=np.float32)
-        self.weights = self.generate_weight_mat()
+        super.Layer.__init__(prev_layer, [num_units], activation_func_name)
+        self.biases = np.zeros([num_unit], dtype=config.FLOAT_TYPE)
+        self.weights = self.generate_weight_mat(num_units, prev_layer.output_shape)
         self.deriv_cache = DerivativeCache(self)
 
     def back_propagate(self):
@@ -19,16 +20,16 @@ class FullyConnectedLayer(Layer):
         self.deriv_wrt_biases()
 
     def forward_propagate(self):
-        self.weights.dot(self.prev_layer.output, out = self.total_input)
-        self.total_input += self.biases
-        self.activation_func(self.total_input, self.output)
+        self.weights.dot(self.prev_layer.output, out = self.z_output)
+        self.z_output += self.biases
+        self.activation_func(self.z_output, self.output)
 
     # Derivative Functions
     def deriv_wrt_biases(self):
         if self.deriv_cache.is_set("biases"):
             return self.deriv_cache.biases
 
-        np.copyto(self.deriv_cache.biases, self.deriv_wrt_unit_total_inputs())
+        np.copyto(self.deriv_cache.biases, self.deriv_wrt_z_outputs())
 
         self.deriv_cache.set('biases')
         return self.deriv_cache.biases
@@ -37,10 +38,10 @@ class FullyConnectedLayer(Layer):
         if self.deriv_cache.is_set("prev_outputs"):
             return self.deriv_cache.prev_outputs
 
-        deriv_wrt_unit_total_inputs = self.deriv_wrt_unit_total_inputs()
+        deriv_wrt_z_outputs = self.deriv_wrt_z_outputs()
         t_weights = self.weights.transpose()
         t_weights.dot(
-            deriv_wrt_unit_total_inputs,
+            deriv_wrt_z_outputs,
             out = self.deriv_cache.prev_outputs
         )
 
@@ -50,23 +51,23 @@ class FullyConnectedLayer(Layer):
     def deriv_wrt_unit_outputs(self):
         return self.next_layer.deriv_wrt_prev_outputs()
 
-    def deriv_wrt_unit_total_inputs(self):
-        if self.deriv_cache.is_set("unit_total_inputs"):
-            return self.deriv_cache.unit_total_inputs
+    def deriv_wrt_z_outputs(self):
+        if self.deriv_cache.is_set("z_outputs"):
+            return self.deriv_cache.z_outputs
 
         self.deriv_activation_func(
-            self.total_input, self.deriv_cache.unit_total_inputs
+            self.z_output, self.deriv_cache.z_outputs
         )
-        self.deriv_cache.unit_total_inputs *= self.deriv_wrt_unit_outputs()
+        self.deriv_cache.z_outputs *= self.deriv_wrt_unit_outputs()
 
-        self.deriv_cache.set("unit_total_inputs")
-        return self.deriv_cache.unit_total_inputs
+        self.deriv_cache.set("z_outputs")
+        return self.deriv_cache.z_outputs
 
     def deriv_wrt_weights(self):
         if self.deriv_cache.is_set("weights"):
             return self.deriv_cache.weights
 
-        deriv_wrt_unit_inputs = self.deriv_wrt_unit_total_inputs()
+        deriv_wrt_unit_inputs = self.deriv_wrt_z_outputs()
         np.outer(
             deriv_wrt_unit_inputs,
             self.prev_layer.output,
@@ -79,13 +80,14 @@ class FullyConnectedLayer(Layer):
     def has_weights(self):
         return True
 
-def generate_weight_mat(num_units, prev_num_units):
+def generate_weight_mat(num_units, output_shape):
+    assert(len(output_shape) == 1)
     w_bound = weight_bound(
-        num_units, prev_num_units
+        num_units, output_shape[0]
     )
     return np.random.uniform(
         -w_bound, w_bound, [num_units, prev_num_units]
-    ).astype(np.float32)
+    ).astype(config.FLOAT_TYPE)
 
 def weight_bound(num_units, prev_num_units):
     return 4 * math.sqrt(6 / (num_units + prev_num_units))

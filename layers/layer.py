@@ -1,6 +1,7 @@
 class Layer:
-    def __init__(self, prev_layer, num_units, activation_func_name):
-        self.num_units = num_units
+    def __init__(self, prev_layer, output_shape, activation_func_name):
+        self.prev_output_shape = prev_layer.output_shape if prev_layer else None
+        self.output_shape = output_shape
 
         activation_funcs = get_activation_functions(activation_func_name)
         self.activation_func = activation_funcs[0]
@@ -11,8 +12,8 @@ class Layer:
         if prev_layer is not None:
             prev_layer.next_layer = self
 
-        self.total_input = np.zeros([num_units], dtype=np.float32)
-        self.output = np.zeros([num_units], dtype=np.float32)
+        self.z_output = np.zeros(output_shape, dtype=np.float32)
+        self.output = np.zeros(output_shape, dtype=np.float32)
 
     def back_propagate(self):
         raise Exception("Not Implemented!")
