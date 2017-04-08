@@ -34,6 +34,9 @@ def get_activation_functions(name):
     elif name == 'sigmoid':
         activation_func = sigmoid
         deriv_activation_func = derivative_of_sigmoid
+    elif name == 'softmax':
+        activation_func = softmax
+        deriv_activation_func =
     else:
         raise Exception("No Activation Function Given!")
 
