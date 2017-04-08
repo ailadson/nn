@@ -17,8 +17,13 @@ cd ..
 unamestr=`uname`
 if [[ "$unamestr" == "Darwin" ]]; then
     GCC=gcc-6
-    #ANACONDA_DIR=/Users/anthonyladson/anaconda
-    ANACONDA_DIR=/Users/ruggeri/.anaconda3
+    if [[ "$USER" == "anthonyladson" ]]; then
+      ANACONDA_DIR=/Users/anthonyladson/anaconda
+    elif [[ "$USER" == "ruggeri" ]]; then
+      ANACONDA_DIR=/Users/ruggeri/.anaconda3
+    else
+      exit 1
+    fi
     BUILD_DIR=pyx/build/temp.macosx-10.7-x86_64-3.6
 
     $GCC -bundle -undefined dynamic_lookup \
