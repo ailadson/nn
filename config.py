@@ -1,4 +1,6 @@
 import numpy as np
 
+BATCH_SIZE = 10
+BATCHES_PER_EVALUATION = 10
 DEBUG_MODE = False
 FLOAT_TYPE = np.float32

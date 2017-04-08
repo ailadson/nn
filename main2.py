@@ -8,37 +8,6 @@ import time
 import pickle
 from tensorflow.examples.tutorials.mnist import input_data
 
-
-def reshape_images(images):
-    return images.reshape([-1, 1, 28, 28])
-
-def train_epoch(nn, t, epoch_num, training_set, validation_set):
-    print(f"Epoch number {epoch_num}")
-    batches = batch_data(training_set, 11)
-    batch_d = None
-    total_batch_loss = 0
-    total_batch_misclassification = 0
-
-    last_time = time.time()
-    for i, batch in enumerate(batches):
-        batch_d = t.train_with_examples(batch)
-        # total_batch_loss += batch_d[0]
-        # total_batch_misclassification += batch_d[1]
-        if (i + 1) % 1 == 0:
-            print(time.time() - last_time)
-            print(f"Batch {i + 1} of {len(batches)}")
-            last_time = time.time()
-            if (i + 1) % 10 == 0:
-                loss, misclassification = evaluate(validation_set, nn)
-                print((loss, misclassification))
-        # if (i + 1 == 2): raise Exception
-
-    loss, misclassification = evaluate(validation_set, nn)
-
-    # print(f"Training Loss: {total_batch_loss/len(batches)} | Training Misclassification: {total_batch_misclassification/len(batches)}")
-    # print(f"Last Batch Loss: {batch_d[0]} | Last Batch Misclassification: {batch_d[1]}")
-    print(f"Epoch number {epoch_num} Loss: {loss} | Epoch number {epoch_num} Misclassification: {misclassification}")
-
 def save_model(name, nn):
     pickle.dump( nn, open( f"models/{name}.p", "wb" ) )
 
