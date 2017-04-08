@@ -3,8 +3,8 @@ from layer import FullyConnectedLayer
 from functions import *
 
 class SoftmaxLayer(Layer):
-    def __init__(self, prev_layer, num_units):
-        super().__init__(prev_layer, [num_units], 'softmax')
+    def __init__(self, prev_layer):
+        super().__init__(prev_layer, [prev_layer.output_shape[0]], 'softmax')
         self.observed_output = None
         self.true_class = None
 
