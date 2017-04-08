@@ -23,3 +23,6 @@ class SoftmaxLayer(Layer):
         unit_outputs = np.zeros(self.output_shape, dtype=config.FLOAT_TYPE)
         derivative_of_softmax_and_ce(self.z_output, self.true_class, unit_outputs)
         return unit_outputs
+
+    def has_weights(self):
+        return False

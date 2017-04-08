@@ -1,5 +1,5 @@
 import pyx.deconvolve2d
-from deriv_cache import ConvDerivativeCache
+from deriv_cache import DerivativeCache
 from functions import *
 from layer import Layer
 import numpy as np
@@ -26,7 +26,7 @@ class ConvolutionLayer(Layer):
             self.kernel_height,
             self.kernel_width
         )
-        self.deriv_cache = ConvDerivativeCache(self)
+        self.deriv_cache = DerivativeCache(self)
 
     def back_propagate(self):
         self.deriv_cache.reset()
