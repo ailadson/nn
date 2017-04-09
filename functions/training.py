@@ -40,14 +40,6 @@ def train_epoch(
         train_loss += batch_train_loss
         train_misclass_rate += batch_train_misclass_rate
 
-        if (batch_idx + 1) % config.BATCHES_PER_EVALUATION == 0:
-            valid_loss, valid_misclass_rate = evaluate(
-                validation_set, nn
-            )
-            print(f">>Epoch number {epoch_num} | "
-                  f"Batch {batch_idx + 1}/{len(batches)} | "
-                  f"Valid Loss: {valid_loss:.3f} | "
-                  f"Valid Misclass Rate: {valid_misclass_rate:.3f}")
         if (batch_idx + 1) % config.BATCHES_PER_LOG == 0:
             train_loss /= config.BATCHES_PER_LOG
             train_misclass_rate /= config.BATCHES_PER_LOG
@@ -62,6 +54,14 @@ def train_epoch(
                   f"Examples per second: {examples_per_second:.3f}")
             train_loss, train_misclass_rate = 0.0, 0.0
             start_time = time.time()
+        if (batch_idx + 1) % config.BATCHES_PER_EVALUATION == 0:
+            valid_loss, valid_misclass_rate = evaluate(
+                validation_set, nn
+            )
+            print(f">>Epoch number {epoch_num} | "
+                  f"Batch {batch_idx + 1}/{len(batches)} | "
+                  f"Valid Loss: {valid_loss:.3f} | "
+                  f"Valid Misclass Rate: {valid_misclass_rate:.3f}")
 
     loss, misclassification = evaluate(validation_set, nn)
     print(f"Epoch number {epoch_num} | Loss: {loss} | "
