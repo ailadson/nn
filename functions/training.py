@@ -1,6 +1,7 @@
 import config
 from functions.activations import cross_entropy
 from functions.data_prep import batch_data
+import time
 
 def evaluate(observations, net):
     loss_sum = 0
@@ -31,6 +32,7 @@ def train_epoch(
     batches = batch_data(training_set, batch_size)
 
     train_loss, train_misclass_rate = 0.0, 0.0
+    start_time = time.time()
     for batch_idx, batch in enumerate(batches):
         batch_train_loss, batch_train_misclass_rate = (
             trainer.train_with_examples(batch)
@@ -49,11 +51,17 @@ def train_epoch(
         if (batch_idx + 1) % config.BATCHES_PER_LOG == 0:
             train_loss /= config.BATCHES_PER_LOG
             train_misclass_rate /= config.BATCHES_PER_LOG
+            total_time = time.time() - start_time
+            examples_per_second = (
+                config.BATCHES_PER_LOG * batch_size / total_time
+            )
             print(f"Epoch number {epoch_num} | "
                   f"Batch {batch_idx + 1}/{len(batches)} | "
                   f"Train Loss: {train_loss:.3f} | "
-                  f"Train Misclass Rate: {train_misclass_rate:.3f}")
+                  f"Train Misclass Rate: {train_misclass_rate:.3f} | "
+                  f"Examples per second: {examples_per_second:.3f}")
             train_loss, train_misclass_rate = 0.0, 0.0
+            start_time = time.time()
 
     loss, misclassification = evaluate(validation_set, nn)
     print(f"Epoch number {epoch_num} | Loss: {loss} | "
