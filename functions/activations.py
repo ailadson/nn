@@ -43,7 +43,13 @@ def cross_entropy(estimated_probs, true_class_idx):
         return 100
     return -1 * math.log(estimated_prob)
 
-def derivative_of_ce(estimated_prob_pos, observation):
+def derivative_of_ce(estimated_prob_pos, observation, out = None):
+    if isinstance(estimated_prob_pos, np.ndarray):
+        out.fill(0)
+        out += ((-1 / estimated_prob_pos) * observation)
+        out += ((1 / (1 - estimated_prob_pos)) * (1 - observation))
+        return out
+
     if observation == 1:
         return -1/estimated_prob_pos
     else:

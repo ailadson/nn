@@ -1,5 +1,6 @@
 import config
 from functions.activations import cross_entropy
+from functions.helpers import np2str
 import numpy as np
 
 class Trainer:
@@ -46,17 +47,31 @@ class Trainer:
 
     def train_with_example(self, example):
         ipt, expected_output = example
-        output = self.net.forward_propagate(ipt)
         expected_true_class_idx = list(expected_output).index(1)
 
+        if config.DEBUG_MODE:
+            print(">>> Forward Propagate <<<")
+        output = self.net.forward_propagate(ipt)
+        if config.DEBUG_LOG_ACTIVATIONS:
+            self.log_activations()
+
+        if config.DEBUG_MODE:
+            print(">>> Back Propagate <<<")
         self.net.back_propagate(expected_output)
+        if config.DEBUG_LOG_DERIVATIVES:
+            self.log_derivatives()
         self.accumulate_weight_deriv_mats_and_bias_vecs()
         estimated_true_class_idx = list(output).index(max(output))
 
-        loss = cross_entropy(output, expected_true_class_idx)
+        # TODO: put me back in.
+        loss = 0.0 #cross_entropy(output, expected_true_class_idx)
         misclassification = (
             1 if expected_true_class_idx != estimated_true_class_idx else 0
         )
+
+        if config.DEBUG_MODE:
+            input("press enter to continue")
+
         return (loss, misclassification)
 
     #accumulate derivative over course of batch
@@ -84,3 +99,22 @@ class Trainer:
             if layer.has_weights():
                 self.weight_deriv_mats[i] *= 0
                 self.bias_deriv_vecs[i] *= 0
+
+    def log_activations(self):
+        for layer_idx, layer in enumerate(self.net.layers):
+            if layer_idx == 0: continue
+            print(f"Layer #{layer_idx} {type(layer)} | "
+                  f"activations: "
+                  f"{np2str(layer.output)}")
+
+        logits = self.net.layers[-1].logits()
+        print(f"Output logits: {np2str(logits)}")
+
+    def log_derivatives(self):
+        for layer_idx in reversed(range(len(self.net.layers))):
+            layer = self.net.layers[layer_idx]
+            if not layer.has_weights(): continue
+
+            print(f"Layer #{layer_idx} {type(layer)} | "
+                  f"deriv_wrt_weights: "
+                  f"{np2str(layer.deriv_wrt_weights())}")

@@ -17,5 +17,8 @@ class Rank3InputLayer():
     def forward_propagate(self):
         pass
 
+    def deriv_wrt_outputs(self):
+        return self.next_layer.deriv_wrt_prev_outputs()
+
     def has_weights(self):
         return False

@@ -13,9 +13,14 @@ class FlattenLayer(Layer):
     def forward_propagate(self):
         self.output[:] = self.prev_layer.output.reshape(self.output_shape)[:]
 
+    def deriv_wrt_outputs(self):
+        return self.next_layer.deriv_wrt_prev_outputs()
+
     def deriv_wrt_prev_outputs(self):
-        next_deriv_wrt_unit_total_inputs = self.next_layer.deriv_wrt_prev_outputs()
-        return next_deriv_wrt_unit_total_inputs.reshape(self.prev_layer.output.shape)
+        deriv_wrt_prev_outputs = (
+            self.next_layer.deriv_wrt_prev_outputs()
+        ).reshape(self.prev_layer.output.shape)
+        return deriv_wrt_prev_outputs
 
     def has_weights(self):
         return False

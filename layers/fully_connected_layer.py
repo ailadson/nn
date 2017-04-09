@@ -34,6 +34,9 @@ class FullyConnectedLayer(Layer):
         self.deriv_cache.set('biases')
         return self.deriv_cache.biases
 
+    def deriv_wrt_outputs(self):
+        return self.next_layer.deriv_wrt_prev_outputs()
+
     def deriv_wrt_prev_outputs(self):
         if self.deriv_cache.is_set("prev_outputs"):
             return self.deriv_cache.prev_outputs
