@@ -1,7 +1,6 @@
 import config
-from functions import *
+from functions.activations import cross_entropy
 import numpy as np
-
 
 class Trainer:
     def __init__(self, net, learning_rate):
