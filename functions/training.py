@@ -1,6 +1,6 @@
 import config
 import random
-from functions import *
+from functions.activations import cross_entropy
 from tensorflow.examples.tutorials.mnist import input_data
 
 def batch_data(observations, num_size):
