@@ -20,9 +20,15 @@ def evaluate(observations, net):
     misclassification_rate = misclassification / num_observations
     return (avg_loss, misclassification_rate)
 
-def train_epoch(nn, trainer, epoch_num, training_set, validation_set):
+def train_epoch(
+        nn,
+        trainer,
+        epoch_num,
+        training_set,
+        validation_set,
+        batch_size):
     print(f"Epoch number {epoch_num}")
-    batches = batch_data(training_set, config.BATCH_SIZE)
+    batches = batch_data(training_set, batch_size)
 
     train_loss, train_misclass_rate = 0.0, 0.0
     for batch_idx, batch in enumerate(batches):

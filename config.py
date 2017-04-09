@@ -1,6 +1,5 @@
 import numpy as np
 
-BATCH_SIZE = 10
 BATCHES_PER_EVALUATION = 1000
 BATCHES_PER_LOG = 100
 

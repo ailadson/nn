@@ -17,7 +17,7 @@ class FlattenLayer(Layer):
     def calculate_deriv_wrt_prev_outputs(self, deriv_wrt_prev_outputs):
         deriv_wrt_prev_outputs[:] = (
             self.next_layer.deriv_wrt_prev_outputs()
-        ).reshape(self.prev_layer.output.shape)[:]
+        ).reshape(self.prev_layer.output_shape)[:]
 
     # Other
     def has_weights(self):

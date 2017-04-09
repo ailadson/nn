@@ -19,10 +19,9 @@ class ConvolutionLayer(Layer):
             prev_layer.output_shape[2]
         )
 
-        super().__init__(prev_layer, output_shape, activation_func_name)
         self.kernel_height = kernel_height
         self.kernel_width = kernel_width
-        self.num_input_layers = self.prev_output_shape[0]
+        self.num_input_layers = prev_layer.output_shape[0]
         self.num_output_layers = num_output_layers
 
         self.biases = config.float_zeros(self.num_output_layers)
@@ -33,21 +32,23 @@ class ConvolutionLayer(Layer):
             self.kernel_width
         )
 
+        super().__init__(prev_layer, output_shape, activation_func_name)
+
     # Activation Functions
     def calculate_z_outputs(self, z_outputs):
         pyx.avx_convolve2d.apply_convolution(
-            self.prev_layer.outputs(), self.weights, z_output
+            self.prev_layer.outputs(), self.weights, z_outputs
         )
         z_outputs += self.biases[:, None, None]
 
     def calculate_outputs(self, outputs):
-        self.activation_func(self.z_outputs(), self.outputs)
+        self.activation_func(self.z_outputs(), outputs)
 
     # Derivative Functions
     def calculate_deriv_wrt_weights(self, deriv_wrt_weights):
         pyx.deconvolve2d.deriv_wrt_weights(
-            self.prev_layer.output,
-            self.deriv_cache.weights,
+            self.prev_layer.outputs(),
+            deriv_wrt_weights,
             self.deriv_wrt_z_outputs()
         )
 
@@ -55,7 +56,7 @@ class ConvolutionLayer(Layer):
         self.deriv_activation_func(
             self.z_outputs(), deriv_wrt_z_outputs
         )
-        self.deriv_cache.z_outputs *= self.deriv_wrt_outputs()
+        deriv_wrt_z_outputs *= self.deriv_wrt_outputs()
 
     def calculate_deriv_wrt_prev_outputs(self, deriv_wrt_prev_outputs):
         pyx.avx_convolve2d.apply_backward_convolution(
@@ -63,6 +64,10 @@ class ConvolutionLayer(Layer):
             self.weights,
             deriv_wrt_prev_outputs
         )
+
+    def calculate_deriv_wrt_biases(self, deriv_wrt_biases):
+        # TODO: must implement this!
+        deriv_wrt_biases.fill(0.0)
 
     # Others
     def has_weights(self):

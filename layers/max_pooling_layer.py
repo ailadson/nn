@@ -21,14 +21,14 @@ class MaxPoolingLayer(Layer):
         )
 
     def calculate_outputs(self, outputs):
-        self.activation_func(self.z_outputs(), self.outputs())
+        self.activation_func(self.z_outputs(), outputs)
 
     # Derivative Functions
     def calculate_deriv_wrt_prev_outputs(self, deriv_wrt_prev_outputs):
         pyx.max_pooling_functions.back_propagate_channels(
             deriv_wrt_prev_outputs,
             self.prev_layer.outputs(),
-            self.deriv_wrt_unit_outputs()
+            self.deriv_wrt_outputs()
         )
 
     # Other
