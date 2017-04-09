@@ -13,36 +13,24 @@ class MaxPoolingLayer(Layer):
         )
 
         super().__init__(prev_layer, output_shape, 'id')
-        self.deriv_cache = DerivativeCache(self)
 
-    def back_propagate(self):
-        self.deriv_cache.reset()
-        self.deriv_wrt_prev_outputs()
-
-    def forward_propagate(self):
-        self.z_output *= 0;
+    # Activation Functions
+    def calculate_z_outputs(self, z_outputs):
         pyx.max_pooling_functions.apply_max_pooling(
-            self.prev_layer.output, self.z_output
+            self.prev_layer.outputs(), z_outputs
         )
-        self.activation_func(self.z_output, self.output)
+
+    def calculate_outputs(self, outputs)
+        self.activation_func(self.z_outputs(), self.outputs())
 
     # Derivative Functions
-    def deriv_wrt_prev_outputs(self):
-        if self.deriv_cache.is_set("prev_outputs"):
-            return self.deriv_cache.prev_outputs
-
-        self.deriv_cache.prev_outputs *= 0
+    def calculate_deriv_wrt_prev_outputs(self, deriv_wrt_prev_outputs):
         pyx.max_pooling_functions.back_propagate_channels(
-            self.deriv_cache.prev_outputs,
-            self.prev_layer.output,
+            deriv_wrt_prev_outputs,
+            self.prev_layer.outputs(),
             self.deriv_wrt_unit_outputs()
         )
 
-        self.deriv_cache.set('prev_outputs')
-        return self.deriv_cache.prev_outputs
-
-    def deriv_wrt_unit_outputs(self):
-        return self.next_layer.deriv_wrt_prev_outputs()
-
+    # Other
     def has_weights(self):
         return False

@@ -9,8 +9,5 @@ class InputLayer:
                             f" | Expected: {self.num_units}")
         self.output = input_v
 
-    def forward_propagate(self):
-        pass
-
     def has_weights(self):
         return False

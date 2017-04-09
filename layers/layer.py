@@ -1,5 +1,7 @@
 import config
 from functions.activations import *
+from activation_cache import ActivationCache
+from derivative_cache import DerivativeCache
 
 class Layer:
     def __init__(self, prev_layer, output_shape, activation_func_name):
@@ -15,17 +17,91 @@ class Layer:
         if prev_layer is not None:
             prev_layer.next_layer = self
 
-        self.z_output = np.zeros(output_shape, dtype=config.FLOAT_TYPE)
-        self.output = np.zeros(output_shape, dtype=config.FLOAT_TYPE)
+        self.activation_cache = ActivationCache(self)
+        self.derivative_cache = DerivativeCache(self)
 
-    def back_propagate(self):
+    # Activation Functions
+    def z_outputs(self):
+        if self.activation_cache.is_set("z_outputs"):
+            return self.activation_cache.z_outputs
+
+        self.calculate_z_outputs(self.activation_cache.z_outputs)
+        self.activation_cache.set("z_outputs")
+        return self.activation_cache.z_outputs
+
+    def calculate_z_outputs(self, z_outputs):
         raise Exception(f"Not Implemented for {self}!")
 
-    def forward_propagate(self):
+    def outputs(self):
+        if self.activation_cache.is_set("outputs"):
+            return self.activation_cache.outputs
+
+        self.calculate_outputs(self.activation_cache.outputs)
+        self.activation_cache.set("outputs")
+        return self.activation_cache.outputs
+
+    def calculate_outputs(self, outputs):
         raise Exception(f"Not Implemented for {self}!")
 
+    # Derivative Functions
+    def deriv_wrt_biases(self):
+        if self.derivative_cache.is_set("biases"):
+            return self.derivative_cache.biases
+
+        calculate_deriv_wrt_biases(self.derivative_cache.biases)
+        self.derivative_cache.set('biases')
+        return self.derivative_cache.biases
+
+    def calculate_deriv_wrt_biases(self, deriv_wrt_biases):
+        raise Exception(f"Not Implemented for {self}!")
+
+    def deriv_wrt_outputs(self):
+        return self.next_layer.deriv_wrt_prev_outputs()
+
+    def deriv_wrt_prev_outputs(self):
+        if self.derivative_cache.is_set("prev_outputs"):
+            return self.derivative_cache.prev_outputs
+
+        calculate_deriv_wrt_prev_outputs(
+            self.derivative_cache.prev_outputs
+        )
+        self.derivative_cache.set("prev_outputs")
+        return self.derivative_cache.prev_outputs
+
+    def calculate_deriv_wrt_prev_outputs(self, deriv_wrt_prev_outputs):
+        raise Exception(f"Not Implemented for {self}!")
+
+    def deriv_wrt_z_outputs(self):
+        if self.derivative_cache.is_set("z_outputs"):
+            return self.derivative_cache.z_outputs
+
+        self.calculate_deriv_wrt_z_outputs(self)
+        self.derivative_cache.set("z_outputs")
+        return self.derivative_cache.z_outputs
+
+    def calculate_deriv_wrt_z_outputs(self, deriv_wrt_z_outputs):
+        raise Exception(f"Not Implemented for {self}!")
+
+    def deriv_wrt_weights(self):
+        if self.derivative_cache.is_set("weights"):
+            return self.derivative_cache.weights
+
+        self.calculate_deriv_wrt_weights(
+            self, self.derivative_cache.weights
+        )
+        self.derivative_cache.set("weights")
+        return self.derivative_cache.weights
+
+    def calculate_deriv_wrt_weights(self, deriv_wrt_weights):
+        raise Exception(f"Not Implemented for {self}!")
+
+    # Other
     def has_weights(self):
         raise Exception(f"Not Implemented for {self}!")
+
+    def reset_caches(self):
+        self.activation_cache.reset()
+        self.derivative_cache.reset()
 
 def get_activation_functions(name):
     if name == 'id':

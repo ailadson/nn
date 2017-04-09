@@ -11,14 +11,5 @@ class Rank3InputLayer():
             raise Exception("Bad shape")
         np.copyto(self.output, ipt)
 
-    def back_propagate(self):
-        pass
-
-    def forward_propagate(self):
-        pass
-
-    def deriv_wrt_outputs(self):
-        return self.next_layer.deriv_wrt_prev_outputs()
-
     def has_weights(self):
         return False

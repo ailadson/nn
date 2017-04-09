@@ -25,80 +25,55 @@ class ConvolutionLayer(Layer):
         self.num_input_layers = self.prev_output_shape[0]
         self.num_output_layers = num_output_layers
 
-        self.biases = np.zeros(self.num_output_layers, dtype=config.FLOAT_TYPE)
+        self.biases = np.zeros(
+            self.num_output_layers, dtype=config.FLOAT_TYPE
+        )
         self.weights = initialize_weights(
             self.num_output_layers,
             self.num_input_layers,
             self.kernel_height,
             self.kernel_width
         )
-        self.deriv_cache = DerivativeCache(self)
 
-    def back_propagate(self):
-        self.deriv_cache.reset()
-        self.deriv_wrt_weights()
-
-    def forward_propagate(self):
-        self.z_output *= 0
+    # Activation Functions
+    def calculate_z_outputs(self, z_outputs):
         pyx.avx_convolve2d.apply_convolution(
-            self.prev_layer.output, self.weights, self.z_output
+            self.prev_layer.outputs(), self.weights, z_output
         )
-        self.z_output += self.biases[:, None, None]
-        self.activation_func(self.z_output, self.output)
+        z_outputs += self.biases[:, None, None]
 
-    def deriv_wrt_weights(self):
-        if self.deriv_cache.is_set("weights"):
-            return self.deriv_cache.weights
+    def calculate_outputs(self, outputs):
+        self.activation_func(self.z_outputs(), self.outputs)
 
-        self.deriv_cache.weights.fill(0.0)
-        # TODO: we don't do anything to update the biases!
+    # Derivative Functions
+    def calculate_deriv_wrt_weights(self, deriv_wrt_weights):
         pyx.deconvolve2d.deriv_wrt_weights(
             self.prev_layer.output,
             self.deriv_cache.weights,
             self.deriv_wrt_z_outputs()
         )
 
-        self.deriv_cache.set('weights')
-        return self.deriv_cache.weights
-
-    def deriv_wrt_z_outputs(self):
-        if self.deriv_cache.is_set("z_outputs"):
-            return self.deriv_cache.z_outputs
-
+    def calculate_deriv_wrt_z_outputs(self, deriv_wrt_z_outputs):
         self.deriv_activation_func(
-            self.z_output, self.deriv_cache.z_outputs
+            self.z_outputs(), deriv_wrt_z_outputs
         )
-        self.deriv_cache.z_outputs *= (
-            self.deriv_wrt_unit_outputs()
-        )
+        self.deriv_cache.z_outputs *= self.deriv_wrt_outputs()
 
-        return self.deriv_cache.z_outputs
-
-    def deriv_wrt_unit_outputs(self):
-        return self.next_layer.deriv_wrt_prev_outputs()
-
-    def deriv_wrt_prev_outputs(self):
-        if self.deriv_cache.is_set("prev_outputs"):
-            return self.deriv_cache.prev_outputs
-
-        self.deriv_cache.prev_outputs *= 0
+    def calculate_deriv_wrt_prev_outputs(self, deriv_wrt_prev_outputs):
         pyx.avx_convolve2d.apply_backward_convolution(
             self.deriv_wrt_z_outputs(),
             self.weights,
-            self.deriv_cache.prev_outputs
+            deriv_wrt_prev_outputs
         )
 
-        self.deriv_cache.set('prev_outputs')
-        return self.deriv_cache.prev_outputs
-
+    # Others
     def has_weights(self):
         return True
 
+# Helpers
 def initialize_weights(
-    num_output_layers,
-    num_input_layers,
-    kernel_height,
-    kernel_width):
+    num_output_layers, num_input_layers, kernel_height, kernel_width):
+
     return np.random.uniform(-1, 1, [
         num_output_layers,
         num_input_layers,
