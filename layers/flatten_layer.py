@@ -4,7 +4,9 @@ import numpy as np
 
 class FlattenLayer(Layer):
     def __init__(self, prev_layer):
-        num_units = reduce(lambda acc, ele: acc * ele, prev_layer.output_shape)
+        num_units = 1
+        for dim in prev_layer.output_shape: num_units *= dim
+
         super().__init__(prev_layer, [num_units], 'id')
 
     # Activation Functions

@@ -47,12 +47,16 @@ cdef void back_propagate_channel(
     cdef int width = derive_wrt_channel_output.shape[1]
     cdef int height = derive_wrt_channel_output.shape[2]
     cdef s_int_pair max_pair
+    cdef int max_i, max_j
+
     for i in range(width):
         for j in range(height):
             get_local_max_and_pos(
                 channel_idx, prev_channels, i, j, &max_pair
             )
-            deriv_wrt_prev_outputs[channel_idx, max_pair.i, max_pair.j] = (
+            max_i = max_pair.i
+            max_j = max_pair.j
+            deriv_wrt_prev_outputs[channel_idx, max_i, max_j] = (
                 derive_wrt_channel_output[channel_idx, i, j]
             )
 

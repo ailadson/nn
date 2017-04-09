@@ -18,7 +18,9 @@ class Net:
         self.layers.append(Rank3InputLayer(shape))
 
     def add_fc_layer(self, num_units, activation_fn_name):
-        l = FullyConnectedLayer(self.layers[-1], num_units, activation_fn_name)
+        l = FullyConnectedLayer(
+            self.layers[-1], num_units, activation_fn_name
+        )
         self.layers.append(l)
 
     def add_flatten_layer(self):

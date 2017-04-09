@@ -5,8 +5,10 @@ class InputLayer:
 
     def set_input(self, input_v):
         if len(input_v) != self.num_units:
-            raise Exception(f"Wrong number of units in input: {len(input_v)}"
-                            f" | Expected: {self.num_units}")
+            raise Exception(
+                f"Wrong number of units in input: {len(input_v)} | "
+                f"Expected: {self.num_units}"
+            )
         self.output = input_v
 
     def has_weights(self):

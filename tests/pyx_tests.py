@@ -1,3 +1,4 @@
+import config
 from itertools import *
 import numpy as np
 import pyx.avx_convolve2d as convolve2d
@@ -6,7 +7,7 @@ import pyx.max_pooling_functions as max_pooling_functions
 
 IMG_DIM = 28
 def make_test_input(dim = IMG_DIM):
-    x = np.zeros((1, dim, dim)).astype(np.float32)
+    x = config.float_zeros((1, dim, dim))
 
     for (i, j) in product(range(dim), range(dim)):
         x[0, i, j] = i + j
@@ -16,7 +17,8 @@ def make_test_input(dim = IMG_DIM):
 def make_multi_channel_input(num_channels, dim = IMG_DIM):
     x = np.zeros((num_channels, dim, dim)).astype(np.float32)
 
-    for (k, i, j) in product(range(num_channels), range(dim), range(dim)):
+    indexes = product(range(num_channels), range(dim), range(dim))
+    for (k, i, j) in indexes:
         x[k, i, j] = k + i + j
 
     return x
@@ -36,7 +38,7 @@ def make_blank_kernel():
     return k
 
 def make_nd_kernel(num_of_dim):
-    k = np.zeros((1, num_of_dim, KERNEL_DIM, KERNEL_DIM)).astype(np.float32)
+    k = config.float_zeros((1, num_of_dim, KERNEL_DIM, KERNEL_DIM))
     k[0, 0, 1, 1] = 1.0
     k[0, 1, 0, 0] = 1.0
     k[0, 1, 0, 2] = 1.0
@@ -98,14 +100,16 @@ def expected_simple_backward_conv_output():
     return y
 
 def naive_deconvolve(input, kernel, output):
-    for (kernel_i, kernel_j) in product(range(KERNEL_DIM), range(KERNEL_DIM)):
+    kernel_indexes = product(range(KERNEL_DIM), range(KERNEL_DIM))
+    for (kernel_i, kernel_j) in kernel_indexes:
         kernel_offset_i = kernel_i - KERNEL_DIM // 2
         kernel_offset_j = kernel_j - KERNEL_DIM // 2
-        for (input_i, input_j) in product(range(IMG_DIM), range(IMG_DIM)):
+        input_indexes = product(range(IMG_DIM), range(IMG_DIM))
+        for (input_i, input_j) in input_indexes:
             out_i = input_i + kernel_offset_i
             out_j = input_j + kernel_offset_j
-            if out_i < 0 or out_i >= IMG_DIM or out_j < 0 or out_j >= IMG_DIM:
-                continue
+            if out_i < 0 or out_i >= IMG_DIM: continue
+            if out_j < 0 or out_j >= IMG_DIM: continue
             kernel[0, 0, kernel_i, kernel_j] += (
                 output[0, out_i, out_j] * input[0, input_i, input_j]
             )

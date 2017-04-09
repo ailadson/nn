@@ -5,10 +5,15 @@ from layers.derivative_cache import DerivativeCache
 
 class Layer:
     def __init__(self, prev_layer, output_shape, activation_func_name):
-        self.prev_output_shape = prev_layer.output_shape if prev_layer else None
+        if prev_layer:
+            self.prev_output_shape = prev_layer.output_shape
+        else:
+            self.prev_output_shape = None
         self.output_shape = output_shape
 
-        activation_funcs = get_activation_functions(activation_func_name)
+        activation_funcs = get_activation_functions(
+            activation_func_name
+        )
         self.activation_func = activation_funcs[0]
         self.deriv_activation_func = activation_funcs[1]
 

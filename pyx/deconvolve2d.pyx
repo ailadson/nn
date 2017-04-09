@@ -25,8 +25,11 @@ cdef DTYPE_t deconvolve2d_step(
             if z_output_j < 0 or z_output_j >= img_cols:
                 continue
             val += (
-                rank2_get(prev_output_layer, prev_output_i, prev_output_j) *
-                rank2_get(deriv_wrt_z_outputs_layer, z_output_i, z_output_j)
+                rank2_get(
+                    prev_output_layer, prev_output_i, prev_output_j
+                ) * rank2_get(
+                    deriv_wrt_z_outputs_layer, z_output_i, z_output_j
+                )
             )
 
     return val
@@ -72,7 +75,9 @@ cdef void deriv_wrt_weights_(
 
     for z_output_layer_idx in range(num_z_output_layers):
         for prev_output_layer_idx in range(num_prev_output_layers):
-            prev_output_layer = rank3_offset(prev_output_tensor, prev_output_layer_idx)
+            prev_output_layer = rank3_offset(
+                prev_output_tensor, prev_output_layer_idx
+            )
             deriv_wrt_weights_layer = rank4_offset(
               deriv_wrt_weights_tensor,
               z_output_layer_idx,

@@ -5,9 +5,11 @@ import numpy as np
 
 class SoftmaxLayer(Layer):
     def __init__(self, prev_layer):
-        super().__init__(prev_layer, [prev_layer.output_shape[0]], 'softmax')
+        num_classes = prev_layer.output_shape[0]
         self.observed_output = None
         self.true_class = None
+
+        super().__init__(prev_layer, [num_classes], 'softmax')
 
     # Activation Functions
     def calculate_z_outputs(self, z_outputs):

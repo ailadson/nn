@@ -58,6 +58,9 @@ void print_matrix_corners(float* mat, shape_t shape) {
   printf("%6.2f ", mat_get(mat, shape, 0, 0));
   printf("%6.2f ", mat_get(mat, shape, 0, shape.width - 1));
   printf("%6.2f ", mat_get(mat, shape, shape.height - 1, 0));
-  printf("%6.2f ", mat_get(mat, shape, shape.height - 1, shape.width - 1));
+  printf("%6.2f ", mat_get(mat,
+                           shape,
+                           shape.height - 1,
+                           shape.width - 1));
   printf("\n");
 }
