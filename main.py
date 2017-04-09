@@ -28,6 +28,7 @@ def train_simple_fc_net():
     nn.add_softmax_layer()
     run_training(nn, 0.1, 10)
 
+# Trained to ~78% accuracy after 1 epoch.
 def train_one_layer_conv_net():
     nn = Net()
     nn.add_rank3_input_layer((1, 28, 28))
@@ -42,7 +43,30 @@ def train_one_layer_conv_net():
     nn.add_fc_layer(100, "relu")
     nn.add_fc_layer(10, "relu")
     nn.add_softmax_layer()
+    run_training(nn, 1.0, 10)
+
+# A pair of convolutions appears to be giving me trouble...
+def train_two_layer_conv_net():
+    nn = Net()
+    nn.add_rank3_input_layer((1, 28, 28))
+    nn.add_conv_layer(
+        num_out_layers = 4,
+        kernel_height = 3,
+        kernel_width = 3,
+        activation_fn_name = "relu"
+    )
+    nn.add_conv_layer(
+        num_out_layers = 4,
+        kernel_height = 3,
+        kernel_width = 3,
+        activation_fn_name = "relu"
+    )
+    nn.add_flatten_layer()
+    nn.add_fc_layer(100, "relu")
+    nn.add_fc_layer(10, "relu")
+    nn.add_softmax_layer()
     run_training(nn, 0.1, 10)
 
 #train_simple_fc_net()
-train_one_layer_conv_net()
+#train_one_layer_conv_net()
+train_two_layer_conv_net()
