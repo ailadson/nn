@@ -1,6 +1,6 @@
 import config
-from layers.layer import Layer
 from functions.activations import *
+from layers.layer import Layer
 import numpy as np
 
 class SoftmaxLayer(Layer):
