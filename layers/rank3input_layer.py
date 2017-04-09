@@ -11,6 +11,9 @@ class Rank3InputLayer():
             raise Exception("Bad shape")
         np.copyto(self.output, ipt)
 
+    def back_propagate(self):
+        pass
+
     def forward_propagate(self):
         pass
 

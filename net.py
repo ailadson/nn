@@ -28,8 +28,20 @@ class Net:
         l = MaxPoolingLayer(self.layers[-1])
         self.layers.append(l)
 
-    def add_conv_layer(self, kernel_shape, activation_fn_name):
-        l = ConvolutionLayer(self.layers[-1], kernel_shape, activation_fn_name)
+    def add_conv_layer(
+            self,
+            num_out_layers,
+            kernel_height,
+            kernel_width,
+            activation_fn_name):
+
+        l = ConvolutionLayer(
+            self.layers[-1],
+            num_out_layers,
+            kernel_height,
+            kernel_width,
+            activation_fn_name
+        )
         self.layers.append(l)
 
     def add_softmax_layer(self):
@@ -39,7 +51,7 @@ class Net:
     def back_propagate(self, observed_output):
         self.layers[-1].set_observed_output(observed_output)
 
-        for i in reversed(range(1, len(self.layers))):
+        for i in reversed(range(len(self.layers))):
             layer = self.layers[i]
             layer.back_propagate()
 

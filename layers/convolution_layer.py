@@ -7,18 +7,23 @@ import pyx.avx_convolve2d
 import pyx.deconvolve2d
 
 class ConvolutionLayer(Layer):
-    def __init__(self, prev_layer, kernel_shape, activation_func_name):
+    def __init__(self,
+                 prev_layer,
+                 num_output_layers,
+                 kernel_height,
+                 kernel_width,
+                 activation_func_name):
         output_shape = (
-            kernel_shape[0],
+            num_output_layers,
             prev_layer.output_shape[1],
             prev_layer.output_shape[2]
         )
 
         super().__init__(prev_layer, output_shape, activation_func_name)
-        self.kernel_height = kernel_shape[1]
-        self.kernel_width = kernel_shape[2]
+        self.kernel_height = kernel_height
+        self.kernel_width = kernel_width
         self.num_input_layers = self.prev_output_shape[0]
-        self.num_output_layers = self.output_shape[0]
+        self.num_output_layers = num_output_layers
 
         self.biases = np.zeros(self.num_output_layers, dtype=config.FLOAT_TYPE)
         self.weights = initialize_weights(
@@ -36,9 +41,9 @@ class ConvolutionLayer(Layer):
     def forward_propagate(self):
         self.z_output *= 0
         pyx.avx_convolve2d.apply_convolution(
-            self.prev_layer.output, self.weights,  self.z_output
+            self.prev_layer.output, self.weights, self.z_output
         )
-        self.z_output += self.biases
+        self.z_output += self.biases[:, None, None]
         self.activation_func(self.z_output, self.output)
 
     def deriv_wrt_weights(self):

@@ -1,12 +1,16 @@
 import config
 from layers.layer import Layer
-from functions import *
+from functions.activations import *
+import numpy as np
 
 class SoftmaxLayer(Layer):
     def __init__(self, prev_layer):
         super().__init__(prev_layer, [prev_layer.output_shape[0]], 'softmax')
         self.observed_output = None
         self.true_class = None
+
+    def back_propagate(self):
+        pass
 
     def forward_propagate(self):
         np.copyto(self.z_output, self.prev_layer.output)
@@ -19,7 +23,7 @@ class SoftmaxLayer(Layer):
         self.observed_output = observed
         self.true_class = list(observed).index(1)
 
-    def deriv_wrt_unit_outputs(self):
+    def deriv_wrt_prev_outputs(self):
         unit_outputs = np.zeros(self.output_shape, dtype=config.FLOAT_TYPE)
         derivative_of_softmax_and_ce(self.z_output, self.true_class, unit_outputs)
         return unit_outputs

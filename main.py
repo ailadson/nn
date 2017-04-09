@@ -10,9 +10,19 @@ test_set, train_set, validation_set = get_mnist_data()
 # Build Net
 nn = Net()
 nn.add_rank3_input_layer((1, 28, 28))
-nn.add_conv_layer((3, 3, 20), "relu")
+nn.add_conv_layer(
+    num_out_layers = 20,
+    kernel_height = 3,
+    kernel_width = 3,
+    activation_fn_name = "relu"
+)
 nn.add_max_pool_layer()
-nn.add_conv_layer((3, 3, 20), "relu")
+nn.add_conv_layer(
+    num_out_layers = 40,
+    kernel_height = 3,
+    kernel_width = 3,
+    activation_fn_name = "relu"
+)
 nn.add_max_pool_layer()
 nn.add_flatten_layer()
 nn.add_fc_layer(100, "relu")

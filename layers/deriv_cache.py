@@ -4,7 +4,7 @@ import numpy as np
 class DerivativeCache:
     def __init__(self, layer):
         self.prev_outputs = np.zeros(layer.prev_output_shape, dtype=config.FLOAT_TYPE)
-        self.z_output = np.zeros(layer.output_shape, dtype=config.FLOAT_TYPE)
+        self.z_outputs = np.zeros(layer.output_shape, dtype=config.FLOAT_TYPE)
         if layer.has_weights():
             self.biases = np.zeros(layer.biases.shape, dtype=config.FLOAT_TYPE)
             self.weights = np.zeros(layer.weights.shape, dtype=config.FLOAT_TYPE)
@@ -17,7 +17,7 @@ class DerivativeCache:
         self.is_set_d = {
             "weights" : False,
             "prev_outputs" : False,
-            "z_output" : False,
+            "z_outputs" : False,
             "biases" : False
         }
 

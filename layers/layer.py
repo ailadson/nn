@@ -19,13 +19,13 @@ class Layer:
         self.output = np.zeros(output_shape, dtype=config.FLOAT_TYPE)
 
     def back_propagate(self):
-        raise Exception("Not Implemented!")
+        raise Exception(f"Not Implemented for {self}!")
 
     def forward_propagate(self):
-        raise Exception("Not Implemented!")
+        raise Exception(f"Not Implemented for {self}!")
 
     def has_weights(self):
-        raise Exception("Not Implemented!")
+        raise Exception(f"Not Implemented for {self}!")
 
 def get_activation_functions(name):
     if name == 'id':
