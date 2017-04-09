@@ -5,23 +5,13 @@ class DerivativeCache:
     def __init__(self, layer):
         self.layer = layer
 
-        self.outputs = np.zeros(
-            layer.output_shape, dtype=config.FLOAT_TYPE
-        )
-        self.prev_outputs = np.zeros(
-            layer.prev_output_shape, dtype=config.FLOAT_TYPE
-        )
-        self.z_outputs = np.zeros(
-            layer.output_shape, dtype=config.FLOAT_TYPE
-        )
+        self.outputs = config.float_zeros(layer.output_shape)
+        self.prev_outputs = config.float_zeros(layer.prev_output_shape)
+        self.z_outputs = config.float_zeros(layer.output_shape)
 
         if layer.has_weights():
-            self.biases = np.zeros(
-                layer.biases.shape, dtype=config.FLOAT_TYPE
-            )
-            self.weights = np.zeros(
-                layer.weights.shape, dtype=config.FLOAT_TYPE
-            )
+            self.biases = config.float_zeros(layer.biases.shape)
+            self.weights = config.float_zeros(layer.weights.shape)
 
         self.reset()
 

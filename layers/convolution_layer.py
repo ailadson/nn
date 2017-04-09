@@ -25,9 +25,7 @@ class ConvolutionLayer(Layer):
         self.num_input_layers = self.prev_output_shape[0]
         self.num_output_layers = num_output_layers
 
-        self.biases = np.zeros(
-            self.num_output_layers, dtype=config.FLOAT_TYPE
-        )
+        self.biases = config.float_zeros(self.num_output_layers)
         self.weights = initialize_weights(
             self.num_output_layers,
             self.num_input_layers,

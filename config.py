@@ -8,6 +8,9 @@ DEBUG_MODE = True
 FLOAT_TYPE = np.float32
 PROFILE = False
 
+def float_zeros(size):
+    return np.zeros(size, dtype=FLOAT_TYPE)
+
 def start_profiler():
     if PROFILE:
         import cProfile

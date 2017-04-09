@@ -7,7 +7,7 @@ import numpy as np
 class FullyConnectedLayer(Layer):
     def __init__(self, prev_layer, num_units, activation_func_name):
         super().__init__(prev_layer, [num_units], activation_func_name)
-        self.biases = np.zeros([num_units], dtype=config.FLOAT_TYPE)
+        self.biases = config.float_zeros([num_units])
         self.weights = generate_weight_matrix(
             num_units, prev_layer.output_shape
         )

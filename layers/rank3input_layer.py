@@ -4,7 +4,7 @@ import numpy as np
 class Rank3InputLayer():
     def __init__(self, shape):
         self.output_shape = shape
-        self.output = np.zeros(shape, dtype=config.FLOAT_TYPE)
+        self.output = config.float_zeros(shape)
 
     def set_input(self, ipt):
         if ipt.shape != self.output_shape:

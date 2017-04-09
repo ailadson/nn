@@ -3,13 +3,8 @@ import numpy as np
 
 class ActivationCache:
     def __init__(self, layer):
-        self.z_output = np.zeros(
-            layer.output_shape, dtype=config.FLOAT_TYPE
-        )
-        self.output = np.zeros(
-            layer.output_shape, dtype=config.FLOAT_TYPE
-        )
-
+        self.z_output = config.float_zeros(layer.output_shape)
+        self.output = config.float_zeros(layer.output_shape)
         self.reset()
 
     def is_set(self, name):

@@ -17,7 +17,7 @@ class Trainer:
                 weights_mats.append(None)
             else:
                 weights_mats.append(
-                    np.zeros(layer.weights.shape, dtype=config.FLOAT_TYPE)
+                    config.float_zeros(layer.weights.shape)
                 )
         return weights_mats
 
@@ -28,7 +28,7 @@ class Trainer:
                 bias_vecs.append(None)
             else:
                 bias_vecs.append(
-                    np.zeros(layer.biases.shape, dtype=config.FLOAT_TYPE)
+                    config.float_zeros(layer.biases.shape)
                 )
         return bias_vecs
 
