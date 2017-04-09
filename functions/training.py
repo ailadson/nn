@@ -1,18 +1,6 @@
 import config
-import random
 from functions.activations import cross_entropy
-from tensorflow.examples.tutorials.mnist import input_data
-
-def batch_data(observations, num_size):
-    random.shuffle(observations)
-    batches = []
-
-    start = 0
-    while start < len(observations):
-        batches.append(observations[start:start + num_size])
-        start += num_size
-
-    return batches
+from functions.data_prep import batch_data
 
 def evaluate(observations, net):
     loss_sum = 0
@@ -32,46 +20,34 @@ def evaluate(observations, net):
     misclassification_rate = misclassification / num_observations
     return (avg_loss, misclassification_rate)
 
-def get_mnist_data():
-    mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
-
-    test = list(zip(
-        reshape_images(mnist.test.images), mnist.test.labels
-    ))
-    train = list(zip(
-        reshape_images(mnist.train.images), mnist.train.labels
-    ))
-    validation = list(zip(
-        reshape_images(mnist.validation.images), mnist.validation.labels
-    ))
-
-    return (test, train, validation)
-
-def reshape_images(images):
-    return images.reshape([-1, 1, 28, 28])
-
-def segment_data(observations):
-    random.shuffle(observations)
-    training_end = int(len(observations) * 0.8)
-    validation_end = training_end + int(len(observations) * .1)
-    return (
-        observations[:training_end],
-        observations[training_end:validation_end],
-        observations[validation_end:]
-    )
-
 def train_epoch(nn, trainer, epoch_num, training_set, validation_set):
     print(f"Epoch number {epoch_num}")
     batches = batch_data(training_set, config.BATCH_SIZE)
 
+    train_loss, train_misclass_rate = 0.0, 0.0
     for batch_idx, batch in enumerate(batches):
-        trainer.train_with_examples(batch)
+        batch_train_loss, batch_train_misclass_rate = (
+            trainer.train_with_examples(batch)
+        )
+        train_loss += batch_train_loss
+        train_misclass_rate += batch_train_misclass_rate
+
         if (batch_idx + 1) % config.BATCHES_PER_EVALUATION == 0:
-            loss, misclassification = evaluate(validation_set, nn)
+            valid_loss, valid_misclass_rate = evaluate(
+                validation_set, nn
+            )
+            print(f">>Epoch number {epoch_num} | "
+                  f"Batch {batch_idx + 1}/{len(batches)} | "
+                  f"Valid Loss: {valid_loss:.3f} | "
+                  f"Valid Misclass Rate: {valid_misclass_rate:.3f}")
+        if (batch_idx + 1) % config.BATCHES_PER_LOG == 0:
+            train_loss /= config.BATCHES_PER_LOG
+            train_misclass_rate /= config.BATCHES_PER_LOG
             print(f"Epoch number {epoch_num} | "
                   f"Batch {batch_idx + 1}/{len(batches)} | "
-                  f"Loss: {loss} | "
-                  f"Misclassification: {misclassification}")
+                  f"Train Loss: {train_loss:.3f} | "
+                  f"Train Misclass Rate: {train_misclass_rate:.3f}")
+            train_loss, train_misclass_rate = 0.0, 0.0
 
     loss, misclassification = evaluate(validation_set, nn)
     print(f"Epoch number {epoch_num} | Loss: {loss} | "

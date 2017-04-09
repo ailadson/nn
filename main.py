@@ -1,9 +1,8 @@
 import config
+from functions.data_prep import get_mnist_data
+from functions.training import train_epoch
 from net import Net
 from trainer import Trainer
-from functions.training import get_mnist_data, train_epoch
-import time
-import pickle
 
 test_set, train_set, validation_set = get_mnist_data()
 
