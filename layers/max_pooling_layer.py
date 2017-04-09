@@ -20,7 +20,7 @@ class MaxPoolingLayer(Layer):
             self.prev_layer.outputs(), z_outputs
         )
 
-    def calculate_outputs(self, outputs)
+    def calculate_outputs(self, outputs):
         self.activation_func(self.z_outputs(), self.outputs())
 
     # Derivative Functions

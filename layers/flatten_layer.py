@@ -10,7 +10,7 @@ class FlattenLayer(Layer):
     # Activation Functions
     def calculate_outputs(self, outputs):
         outputs[:] = (
-            self.prev_layer.output.reshape(self.output_shape)[:]
+            self.prev_layer.outputs().reshape(self.output_shape)[:]
         )
 
     # Derivative Functions

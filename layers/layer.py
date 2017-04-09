@@ -1,7 +1,7 @@
 import config
 from functions.activations import *
-from activation_cache import ActivationCache
-from derivative_cache import DerivativeCache
+from layers.activation_cache import ActivationCache
+from layers.derivative_cache import DerivativeCache
 
 class Layer:
     def __init__(self, prev_layer, output_shape, activation_func_name):
@@ -48,7 +48,7 @@ class Layer:
         if self.derivative_cache.is_set("biases"):
             return self.derivative_cache.biases
 
-        calculate_deriv_wrt_biases(self.derivative_cache.biases)
+        self.calculate_deriv_wrt_biases(self.derivative_cache.biases)
         self.derivative_cache.set('biases')
         return self.derivative_cache.biases
 
@@ -62,7 +62,7 @@ class Layer:
         if self.derivative_cache.is_set("prev_outputs"):
             return self.derivative_cache.prev_outputs
 
-        calculate_deriv_wrt_prev_outputs(
+        self.calculate_deriv_wrt_prev_outputs(
             self.derivative_cache.prev_outputs
         )
         self.derivative_cache.set("prev_outputs")
@@ -75,7 +75,9 @@ class Layer:
         if self.derivative_cache.is_set("z_outputs"):
             return self.derivative_cache.z_outputs
 
-        self.calculate_deriv_wrt_z_outputs(self)
+        self.calculate_deriv_wrt_z_outputs(
+            self.derivative_cache.z_outputs
+        )
         self.derivative_cache.set("z_outputs")
         return self.derivative_cache.z_outputs
 
@@ -86,9 +88,7 @@ class Layer:
         if self.derivative_cache.is_set("weights"):
             return self.derivative_cache.weights
 
-        self.calculate_deriv_wrt_weights(
-            self, self.derivative_cache.weights
-        )
+        self.calculate_deriv_wrt_weights(self.derivative_cache.weights)
         self.derivative_cache.set("weights")
         return self.derivative_cache.weights
 
@@ -119,6 +119,9 @@ def get_activation_functions(name):
     elif name == 'tanh':
         activation_func = tahn
         deriv_activation_func = derivative_of_tanh
+    elif name == None:
+        activation_func = None
+        deriv_activation_func = None
     else:
         raise Exception("No Activation Function Given!")
 

@@ -10,6 +10,7 @@ class Net:
     def __init__(self):
         self.layers =[]
 
+    # Builder methods
     def add_input_layer(self, num_units):
         self.layers.append(InputLayer(num_units))
 
@@ -48,17 +49,19 @@ class Net:
         l = SoftmaxLayer(self.layers[-1])
         self.layers.append(l)
 
-    def back_propagate(self, observed_output):
-        self.layers[-1].set_observed_output(observed_output)
-
-        for i in reversed(range(len(self.layers))):
-            layer = self.layers[i]
-            layer.back_propagate()
+    # Other
+    def back_propagate(self, expected_output):
+        self.layers[-1].set_observed_output(expected_output)
+        for layer in reversed(self.layers):
+            if layer.has_weights():
+                layer.deriv_wrt_weights()
+                layer.deriv_wrt_biases()
 
     def forward_propagate(self, input_v):
+        self.reset()
         self.layers[0].set_input(input_v)
+        return self.layers[-1].outputs()
 
+    def reset(self):
         for layer in self.layers:
-            layer.forward_propagate()
-
-        return self.layers[-1].output
+            layer.reset_caches()

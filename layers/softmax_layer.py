@@ -11,13 +11,13 @@ class SoftmaxLayer(Layer):
 
     # Activation Functions
     def calculate_z_outputs(self, z_outputs):
-        np.copyto(self.z_output, self.prev_layer.output)
+        np.copyto(z_outputs, self.prev_layer.outputs())
         # to prevent e^(z_output) from being inf, we shift z_output
         # which won't change eventual softmax result.
         z_outputs -= max(z_outputs)
 
-    def calculate_outputs(self, outputs)
-        self.activation_func(self.z_output, outputs)
+    def calculate_outputs(self, outputs):
+        self.activation_func(self.z_outputs(), outputs)
 
     def logits(self):
         return self.z_outputs()

@@ -10,6 +10,7 @@ class Trainer:
         self.weight_deriv_mats = self.init_weight_deriv_mats()
         self.bias_deriv_vecs = self.init_bias_deriv_vecs()
 
+    # ==Initialization methods==
     def init_weight_deriv_mats(self):
         weights_mats = []
         for i, layer in enumerate(self.net.layers):
@@ -32,74 +33,85 @@ class Trainer:
                 )
         return bias_vecs
 
-    def train_with_examples(self, examples):
-        self.reset()
-
-        num_examples = len(examples)
-        loss_sum = 0
-        misclassification = 0
-        for example in examples:
-            loss, misclas = self.train_with_example(example)
-            loss_sum += loss
-            misclassification += misclas
-        self.update_weights_and_biases_of_net(num_examples)
-        return (loss_sum / num_examples, misclassification / num_examples)
-
-    def train_with_example(self, example):
-        ipt, expected_output = example
-        expected_true_class_idx = list(expected_output).index(1)
-
-        if config.DEBUG_MODE:
-            print(">>> Forward Propagate <<<")
-        output = self.net.forward_propagate(ipt)
-        if config.DEBUG_LOG_ACTIVATIONS:
-            self.log_activations()
-
-        if config.DEBUG_MODE:
-            print(">>> Back Propagate <<<")
-        self.net.back_propagate(expected_output)
-        if config.DEBUG_LOG_DERIVATIVES:
-            self.log_derivatives()
-        self.accumulate_weight_deriv_mats_and_bias_vecs()
-        estimated_true_class_idx = list(output).index(max(output))
-
-        # TODO: put me back in.
-        loss = 0.0 #cross_entropy(output, expected_true_class_idx)
-        misclassification = (
-            1 if expected_true_class_idx != estimated_true_class_idx else 0
-        )
-
-        if config.DEBUG_MODE:
-            input("press enter to continue")
-
-        return (loss, misclassification)
-
-    #accumulate derivative over course of batch
-    def accumulate_weight_deriv_mats_and_bias_vecs(self):
-        for i, layer in enumerate(self.net.layers):
-            if not layer.has_weights(): continue
-            # Not sure if incrementing a numpy obj inside a list creates a copy
-            # of the numpy array
-            temp_weight_mat = self.weight_deriv_mats[i]
-            temp_weight_mat += layer.deriv_cache.weights
-            temp_bias_vec = self.bias_deriv_vecs[i]
-            temp_bias_vec += layer.deriv_cache.biases
-
-    #at the end of batch, perform update
-    def update_weights_and_biases_of_net(self, num_of_examples):
-        for i, layer in enumerate(self.net.layers):
-            if not layer.has_weights(): continue
-            self.weight_deriv_mats[i] *= (-self.learning_rate / num_of_examples)
-            self.bias_deriv_vecs[i] *= (-self.learning_rate / num_of_examples)
-            layer.weights += self.weight_deriv_mats[i]
-            layer.biases += self.bias_deriv_vecs[i]
-
+    # ==Training methods==
     def reset(self):
         for i, layer in enumerate(self.net.layers):
             if layer.has_weights():
                 self.weight_deriv_mats[i] *= 0
                 self.bias_deriv_vecs[i] *= 0
 
+    def train_with_examples(self, examples):
+        self.reset()
+
+        num_examples = len(examples)
+        loss_sum = 0
+        misclassifications = 0
+        for example in examples:
+            loss, did_misclassify = self.train_with_example(example)
+            loss_sum += loss
+            if did_misclassify: misclassifications += 1
+
+        self.update_weights_and_biases_of_net(num_examples)
+
+        avg_loss = loss_sum / num_examples
+        misclassification_rate = misclassifications / num_examples
+        return (avg_loss, misclassification_rate)
+
+    def train_with_example(self, example):
+        input_v, expected_output = example
+        expected_true_class_idx = list(expected_output).index(1)
+
+        if config.DEBUG_STEP_BY_STEP:
+            print(">>> Forward Propagate <<<")
+        output = self.net.forward_propagate(input_v)
+        if config.DEBUG_LOG_ACTIVATIONS:
+            self.log_activations()
+
+        if config.DEBUG_STEP_BY_STEP:
+            print(">>> Back Propagate <<<")
+        self.net.back_propagate(expected_output)
+        if config.DEBUG_LOG_DERIVATIVES:
+            self.log_derivatives()
+        self.accumulate_weight_deriv_mats_and_bias_vecs()
+
+        estimated_true_class_idx = list(output).index(max(output))
+        # TODO: put me back in.
+        loss = 0.0 #cross_entropy(output, expected_true_class_idx)
+        did_misclassify = (
+            expected_true_class_idx != estimated_true_class_idx
+        )
+
+        if config.DEBUG_STEP_BY_STEP:
+            input("press enter to continue")
+
+        return (loss, did_misclassify)
+
+    # ==Update methods==
+
+    # accumulate derivative over course of batch
+    def accumulate_weight_deriv_mats_and_bias_vecs(self):
+        for i, layer in enumerate(self.net.layers):
+            if not layer.has_weights(): continue
+            # Not sure if incrementing a numpy obj inside a list
+            # creates a copy of the numpy array
+            temp_weight_mat = self.weight_deriv_mats[i]
+            temp_weight_mat += layer.deriv_wrt_weights()
+            temp_bias_vec = self.bias_deriv_vecs[i]
+            temp_bias_vec += layer.deriv_wrt_biases()
+
+    # at the end of batch, perform update
+    def update_weights_and_biases_of_net(self, num_examples):
+        learning_rate = (-self.learning_rate / num_examples)
+        for i, layer in enumerate(self.net.layers):
+            if not layer.has_weights(): continue
+
+            self.weight_deriv_mats[i] *= learning_rate
+            self.bias_deriv_vecs[i] *= learning_rate
+
+            layer.weights += self.weight_deriv_mats[i]
+            layer.biases += self.bias_deriv_vecs[i]
+
+    # == Logging Methods ==
     def log_activations(self):
         for layer_idx, layer in enumerate(self.net.layers):
             if layer_idx == 0: continue

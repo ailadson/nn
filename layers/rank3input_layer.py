@@ -1,15 +1,17 @@
 import config
+from layers.layer import Layer
 import numpy as np
 
-class Rank3InputLayer():
+class Rank3InputLayer(Layer):
     def __init__(self, shape):
-        self.output_shape = shape
-        self.output = config.float_zeros(shape)
+        super().__init__(None, shape, None)
 
-    def set_input(self, ipt):
-        if ipt.shape != self.output_shape:
+    def set_input(self, input_v):
+        if input_v.shape != self.output_shape:
             raise Exception("Bad shape")
-        np.copyto(self.output, ipt)
+
+        np.copyto(self.activation_cache.outputs, input_v)
+        self.activation_cache.set("outputs")
 
     def has_weights(self):
         return False
