@@ -1,10 +1,11 @@
 from functools import reduce
+from layers.layer import Layer
 import numpy as np
 
 class FlattenLayer(Layer):
     def __init__(self, prev_layer):
         num_units = reduce(lambda acc, ele: acc * ele, prev_layer.output_shape)
-        super().Layer.__init(prev_layer, [num_units], 'id')
+        super().__init__(prev_layer, [num_units], 'id')
 
     def back_propagate(self):
         pass

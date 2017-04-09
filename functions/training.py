@@ -35,11 +35,17 @@ def evaluate(observations, net):
 def get_mnist_data():
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
-    test = list(zip(reshape_images(mnist.test.images), mnist.test.labels))
-    validation = list(zip(reshape_images(mnist.validation.images), mnist.validation.labels))
-    train = list(zip(reshape_images(mnist.train.images), mnist.train.labels))
+    test = list(zip(
+        reshape_images(mnist.test.images), mnist.test.labels
+    ))
+    train = list(zip(
+        reshape_images(mnist.train.images), mnist.train.labels
+    ))
+    validation = list(zip(
+        reshape_images(mnist.validation.images), mnist.validation.labels
+    ))
 
-    return (test, validation, training)
+    return (test, train, validation)
 
 def reshape_images(images):
     return images.reshape([-1, 1, 28, 28])
@@ -59,7 +65,7 @@ def train_epoch(nn, trainer, epoch_num, training_set, validation_set):
     batches = batch_data(training_set, config.BATCH_SIZE)
 
     for batch_idx, batch in enumerate(batches):
-        t.train_with_examples(batch)
+        trainer.train_with_examples(batch)
         if (batch_idx + 1) % config.BATCHES_PER_EVALUATION == 0:
             loss, misclassification = evaluate(validation_set, nn)
             print(f"Epoch number {epoch_num} | "

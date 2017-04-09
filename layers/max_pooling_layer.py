@@ -1,9 +1,10 @@
-from deriv_cache import DerivativeCache
+from layers.deriv_cache import DerivativeCache
+from layers.layer import Layer
 import math
 import numpy as np
 import pyx.max_pooling_functions
 
-class MaxPoolingLayer():
+class MaxPoolingLayer(Layer):
     def __init__(self, prev_layer):
         output_shape = (
             prev_layer.output_shape[0],
@@ -11,7 +12,7 @@ class MaxPoolingLayer():
             math.ceil(prev_layer.output_shape[2] / 2)
         )
 
-        super().Layer.__init__(prev_layer, output_shape, 'id')
+        super().__init__(prev_layer, output_shape, 'id')
         self.deriv_cache = DerivativeCache(self)
 
     def back_propagate(self):

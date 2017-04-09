@@ -1,5 +1,5 @@
 import config
-from layer import FullyConnectedLayer
+from layers.layer import Layer
 from functions import *
 
 class SoftmaxLayer(Layer):

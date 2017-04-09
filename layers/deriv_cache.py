@@ -1,5 +1,4 @@
 import config
-from functions import zeros
 import numpy as np
 
 class DerivativeCache:

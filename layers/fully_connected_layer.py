@@ -1,17 +1,17 @@
 import config
-from deriv_cache import DerivativeCache
 from functions import *
 from itertools import product
-from layer import Layer
+from layers.deriv_cache import DerivativeCache
+from layers.layer import Layer
 import math
 import numpy as np
 from random import uniform
 
 class FullyConnectedLayer(Layer):
     def __init__(self, prev_layer, num_units, activation_func_name):
-        super.Layer.__init__(prev_layer, [num_units], activation_func_name)
-        self.biases = np.zeros([num_unit], dtype=config.FLOAT_TYPE)
-        self.weights = self.generate_weight_mat(num_units, prev_layer.output_shape)
+        super().__init__(prev_layer, [num_units], activation_func_name)
+        self.biases = np.zeros([num_units], dtype=config.FLOAT_TYPE)
+        self.weights = generate_weight_matrix(num_units, prev_layer.output_shape)
         self.deriv_cache = DerivativeCache(self)
 
     def back_propagate(self):
@@ -80,10 +80,12 @@ class FullyConnectedLayer(Layer):
     def has_weights(self):
         return True
 
-def generate_weight_mat(num_units, output_shape):
+def generate_weight_matrix(num_units, output_shape):
     assert(len(output_shape) == 1)
+    prev_num_units = output_shape[0]
+
     w_bound = weight_bound(
-        num_units, output_shape[0]
+        num_units, prev_num_units
     )
     return np.random.uniform(
         -w_bound, w_bound, [num_units, prev_num_units]

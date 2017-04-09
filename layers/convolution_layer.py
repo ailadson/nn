@@ -1,9 +1,10 @@
-import pyx.deconvolve2d
-from deriv_cache import DerivativeCache
+import config
 from functions import *
-from layer import Layer
+from layers.deriv_cache import DerivativeCache
+from layers.layer import Layer
 import numpy as np
 import pyx.avx_convolve2d
+import pyx.deconvolve2d
 
 class ConvolutionLayer(Layer):
     def __init__(self, prev_layer, kernel_shape, activation_func_name):
@@ -13,7 +14,7 @@ class ConvolutionLayer(Layer):
             prev_layer.output_shape[2]
         )
 
-        super.Layer.__init__(prev_layer, output_shape, activation_func_name)
+        super().__init__(prev_layer, output_shape, activation_func_name)
         self.kernel_height = kernel_shape[1]
         self.kernel_width = kernel_shape[2]
         self.num_input_layers = self.prev_output_shape[0]

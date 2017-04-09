@@ -1,10 +1,10 @@
-from layer.input_layer import InputLayer
-from layer.softmax_layer import SoftmaxLayer
-from layer.fully_connected_layer import FullyConnectedLayer
-from layer.convolution_layer import ConvolutionalLayer
-from layer.rank3input_layer import Rank3InputLayer
-from layer.max_pooling_layer import MaxPoolingLayer
-from layer.flatten_layer import FlattenLayer
+from layers.convolution_layer import ConvolutionLayer
+from layers.flatten_layer import FlattenLayer
+from layers.fully_connected_layer import FullyConnectedLayer
+from layers.input_layer import InputLayer
+from layers.max_pooling_layer import MaxPoolingLayer
+from layers.rank3input_layer import Rank3InputLayer
+from layers.softmax_layer import SoftmaxLayer
 
 class Net:
     def __init__(self):
@@ -29,7 +29,7 @@ class Net:
         self.layers.append(l)
 
     def add_conv_layer(self, kernel_shape, activation_fn_name):
-        l = ConvolutionalLayer(self.layers[-1], kernel_shape, activation_fn_name)
+        l = ConvolutionLayer(self.layers[-1], kernel_shape, activation_fn_name)
         self.layers.append(l)
 
     def add_softmax_layer(self):
