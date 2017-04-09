@@ -1,7 +1,7 @@
 import config
 from functions import *
 from itertools import product
-from layers.deriv_cache import DerivativeCache
+from layers.derivative_cache import DerivativeCache
 from layers.layer import Layer
 import math
 import numpy as np

@@ -1,6 +1,6 @@
 import config
 from functions import *
-from layers.deriv_cache import DerivativeCache
+from layers.derivative_cache import DerivativeCache
 from layers.layer import Layer
 import numpy as np
 import pyx.avx_convolve2d

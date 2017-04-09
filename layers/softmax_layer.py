@@ -1,5 +1,5 @@
 import config
-from layers.deriv_cache import DerivativeCache
+from layers.derivative_cache import DerivativeCache
 from layers.layer import Layer
 from functions.activations import *
 import numpy as np
