@@ -52,16 +52,24 @@ class FullyConnectedLayer(Layer):
         return True
 
 # Helpers
-def generate_weight_matrix(num_units, output_shape):
-    assert(len(output_shape) == 1)
-    prev_num_units = output_shape[0]
+def generate_weight_matrix(num_units, prev_output_shape):
+    assert(len(prev_output_shape) == 1)
+    prev_num_units = prev_output_shape[0]
 
-    w_bound = weight_bound(
-        num_units, prev_num_units
-    )
-    return np.random.uniform(
-        -w_bound, w_bound, [num_units, prev_num_units]
-    ).astype(config.FLOAT_TYPE)
+    if config.FC_WEIGHTS == "UNIFORM":
+        w_bound = weight_bound(
+            num_units, prev_num_units
+        )
+        return np.random.uniform(
+            -w_bound, w_bound, [num_units, prev_num_units]
+        ).astype(config.FLOAT_TYPE)
+    elif config.FC_WEIGHTS == "NORMAL":
+        stddev = np.sqrt(1 / prev_num_units)
+        return np.random.normal(
+            0, stddev, [num_units, prev_num_units]
+        ).astype(config.FLOAT_TYPE)
+    else:
+        raise Exception("Unknown fc weights setting")
 
 def weight_bound(num_units, prev_num_units):
     return 4 * math.sqrt(6 / (num_units + prev_num_units))

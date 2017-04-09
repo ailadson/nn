@@ -45,27 +45,31 @@ def train_one_layer_conv_net():
     nn.add_softmax_layer()
     run_training(nn, 1.0, 10)
 
-# A pair of convolutions appears to be giving me trouble...
+# This works okay! It gets to about 90% accuracy for me. To get that I
+# had to drop the learning rate and use a different weight
+# initialization.
 def train_two_layer_conv_net():
     nn = Net()
     nn.add_rank3_input_layer((1, 28, 28))
     nn.add_conv_layer(
-        num_out_layers = 4,
+        num_out_layers = 20,
         kernel_height = 3,
         kernel_width = 3,
         activation_fn_name = "relu"
     )
+    nn.add_max_pool_layer()
     nn.add_conv_layer(
-        num_out_layers = 4,
+        num_out_layers = 40,
         kernel_height = 3,
         kernel_width = 3,
         activation_fn_name = "relu"
     )
+    nn.add_max_pool_layer()
     nn.add_flatten_layer()
     nn.add_fc_layer(100, "relu")
-    nn.add_fc_layer(10, "relu")
+    nn.add_fc_layer(10, "id")
     nn.add_softmax_layer()
-    run_training(nn, 0.1, 10)
+    run_training(nn, 0.01, 10)
 
 #train_simple_fc_net()
 #train_one_layer_conv_net()

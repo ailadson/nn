@@ -11,6 +11,10 @@ DEBUG_LOG_DERIVATIVES = DEBUG_STEP_BY_STEP and False
 FLOAT_TYPE = np.float32
 PROFILE = False
 
+# Can set these to NORMAL or UNIFORM.
+CONV_WEIGHTS = "NORMAL"
+FC_WEIGHTS = "NORMAL"
+
 def float_zeros(size):
     return np.zeros(size, dtype=FLOAT_TYPE)
 

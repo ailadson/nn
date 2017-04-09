@@ -77,9 +77,22 @@ class ConvolutionLayer(Layer):
 def initialize_weights(
     num_output_layers, num_input_layers, kernel_height, kernel_width):
 
-    return np.random.uniform(-1, 1, [
-        num_output_layers,
-        num_input_layers,
-        kernel_height,
-        kernel_width
-    ]).astype(config.FLOAT_TYPE)
+    if config.CONV_WEIGHTS == "UNIFORM":
+        return np.random.uniform(-1, 1, [
+            num_output_layers,
+            num_input_layers,
+            kernel_height,
+            kernel_width
+        ]).astype(config.FLOAT_TYPE)
+    elif config.CONV_WEIGHTS == "NORMAL":
+        stddev = np.sqrt(
+            1 / (num_input_layers*kernel_height*kernel_width)
+        )
+        return np.random.normal(0, stddev, [
+            num_output_layers,
+            num_input_layers,
+            kernel_height,
+            kernel_width
+        ]).astype(config.FLOAT_TYPE)
+    else:
+        raise Exception("Unkown conv weights setting")
