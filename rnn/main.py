@@ -20,11 +20,16 @@ session = tf.Session()
 session.run(tf.global_variables_initializer())
 
 for i in range(EPOCHS):
-    state = tf.zeros([BATCH_SIZE, NUM_LSTM_UNITS])
+    state = tf.contrib.rnn.LSTMStateTuple(
+        np.zeros([BATCH_SIZE, NUM_LSTM_UNITS]),
+        np.zeros([BATCH_SIZE, NUM_LSTM_UNITS])
+    )
+
     for j, (batch_x, batch_y) in enumerate(train_batches):
-        state, loss, _ = session.run([g.final_state, g.total_loss, g.train_op], feed_dict={
+        state, loss, _ = session.run([g.final_state, g.avg_loss, g.train_op], feed_dict={
             g.inputs: batch_x,
             g.outputs: batch_y,
-            g.initial_state: state,
+            g.initial_state.c: state.c,
+            g.initial_state.h: state.h
         })
         print(f"Epoch {i}, Batch {j} | Loss: {loss}")
