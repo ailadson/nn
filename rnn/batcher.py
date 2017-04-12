@@ -11,9 +11,9 @@ def make_batches(one_hot_txt, batch_size, num_training_steps):
     # create matrix where dim 0 in the stream num; dim 1 is a character pos
     # dim 2 in the one hot encoding
     streams_x = np.stack(np.split(one_hot_txt_x, batch_size))
-    batches_x = np.split(streams_x, num_training_steps, axis=1)
+    batches_x = np.split(streams_x, num_batches, axis=1)
     streams_y = np.stack(np.split(one_hot_txt_y, batch_size))
-    batches_y = np.split(streams_y, num_training_steps, axis=1)
+    batches_y = np.split(streams_y, num_batches, axis=1)
     return list(zip(batches_x, batches_y))
 
 def partition_batches(batches):
