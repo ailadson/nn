@@ -2,11 +2,12 @@ from collections import namedtuple
 import config
 import tensorflow as tf
 import numpy as np
+from lstm_cell import BasicLSTMCell
 
 
 Graph = namedtuple('Graph', [
     'inputs', 'outputs', 'initial_states',
-    'final_states', 'all_predictions', 'avg_loss', 'train_op'
+    'final_states', 'all_predictions', 'avg_loss', 'train_op', 'weights'
 ])
 
 def build_graph(
@@ -25,11 +26,20 @@ def build_graph(
         name="outputs"
     )
 
-    cells = [
-        tf.contrib.rnn.BasicLSTMCell(
-            num_lstm_units, state_is_tuple=True
-        ) for i in range(num_layers)
-    ]
+    if config.USE_MY_LSTM:
+        cells = [
+            BasicLSTMCell(
+                num_lstm_units,
+                num_chars if i == 0 else num_lstm_units,
+                name=f"layer{i}"
+            ) for i in range(num_layers)
+        ]
+    else:
+        cells = [
+            tf.contrib.rnn.BasicLSTMCell(
+                num_lstm_units, state_is_tuple=True
+            ) for i in range(num_layers)
+        ]
 
     prev_states = [
         tf.contrib.rnn.LSTMStateTuple(
@@ -109,7 +119,8 @@ def build_graph(
         final_states=final_states,
         all_predictions=all_predictions,
         avg_loss=avg_loss,
-        train_op=train_op
+        train_op=train_op,
+        weights=weight_mat
     )
 
 def make_initial_states(batch_size, num_layers, num_lstm_units):

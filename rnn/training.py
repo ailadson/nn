@@ -38,7 +38,7 @@ def run_validation(session, epoch_idx, runConf):
 
     avg_loss /= len(runConf.val_batches)
     # avg_classification_rate /= len(val_batches)
-    runConf.saver.save(session, f"checkpoints/epoch_{epoch_idx}_l{avg_loss}")
+    runConf.saver.save(session, f"checkpoints/epoch_{epoch_idx}_l{avg_loss}.ckpt")
     print(f"Epoch {epoch_idx} | Validation Loss: {avg_loss}")
 
 def run_epoch(session, epoch_idx, runConf):

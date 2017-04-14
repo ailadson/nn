@@ -10,7 +10,7 @@ class TextDataSet:
         self.char_to_int_map = {}
         self.int_to_char_map = {}
 
-        self.text = None
+        self.text = ""
         self.text_as_ints = None
         self.text_as_one_hot = None
         self.num_chars = None
@@ -24,7 +24,6 @@ class TextDataSet:
         print("One Hot Encoding Success!")
 
     def read(self):
-        text = ""
         rex = re.compile(r'\W+')
         with open(self.filename, 'r') as f:
             for line in f.readlines():
@@ -32,8 +31,9 @@ class TextDataSet:
                     line = line.rstrip()
                 if config.COLLAPSE_WHITESPACE:
                     line = rex.sub(' ', line)
-                text += line.lower()
-        self.text = text
+                if config.CASE_INSENSITIVE:
+                    line = line.lower()
+                self.text += line
         self.num_chars = len(set(self.text))
 
     def build_char_int_maps(self):
