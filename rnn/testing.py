@@ -45,7 +45,7 @@ with tf.Session() as session:
     #inspect the initial weights
     print(session.run([g.weights]))
 
-    print(f"Start feeding in prime text: {result}")
+    print(f"Start Feeding In Prime Text: {result}")
     for char in result:
         char_encoding = dataset.char_to_one_hot(char)
         char_encoding = char_encoding.reshape([1, 1, -1])
@@ -56,8 +56,8 @@ with tf.Session() as session:
                 tuple(g.initial_states): tuple(states)
             }
         )
-    print("Finish Loading Prime")
 
+    print("Producing Sample...")
     while len(result) < config.SAMPLE_LENGTH:
         prediction = predictions[0]
         char = dataset.one_hot_to_char(prediction)
@@ -70,4 +70,4 @@ with tf.Session() as session:
             }
         )
 
-print(result)
+print(f"Sample: {result}")
