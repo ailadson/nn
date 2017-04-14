@@ -1,12 +1,15 @@
+# dataset constants
 DATASET_FILENAME = 'test.txt'
 READ_NEW_LINES = False
 COLLAPSE_WHITESPACE = True
 CASE_INSENSITIVE = True
 
+# architecture constants
 NUM_LAYERS = 1
 NUM_LSTM_UNITS = 218
 USE_MY_LSTM = False
 
+# training constants
 EPOCHS = 20
 LEARNING_RATE = 0.001
 CLIP_GRADIENT = 5
