@@ -2,8 +2,8 @@ import batcher
 from config import *
 import tensorflow as tf
 import graph
-from text_data_set import TextDataSet
 from collections import namedtuple
+from text_data_set import TextDataSet
 
 RunConfig = namedtuple(
     'RunConfig', [
@@ -21,6 +21,7 @@ def run_validation(session, epoch_idx, runConf):
     avg_classification_rate = 0
     states = runConf.initial_states
     g = runConf.graph
+    dataset = runConf.dataset
     print("Starting Validation")
 
     for (batch_x, batch_y) in runConf.val_batches:
@@ -37,7 +38,6 @@ def run_validation(session, epoch_idx, runConf):
         # avg_classification_rate += class_rate
 
     avg_loss /= len(runConf.val_batches)
-    # avg_classification_rate /= len(val_batches)
     runConf.saver.save(session, f"checkpoints/epoch_{epoch_idx}_l{avg_loss}.ckpt")
     print(f"Epoch {epoch_idx} | Validation Loss: {avg_loss}")
 

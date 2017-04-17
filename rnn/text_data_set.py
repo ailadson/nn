@@ -27,12 +27,13 @@ class TextDataSet:
         rex = re.compile(r'\W+')
         with open(self.filename, 'r') as f:
             for line in f.readlines():
-                if not config.READ_NEW_LINES:
-                    line = line.rstrip()
-                if config.COLLAPSE_WHITESPACE:
-                    line = rex.sub(' ', line)
                 if config.CASE_INSENSITIVE:
                     line = line.lower()
+                if not config.READ_NEW_LINES:
+                    line = re.sub('\n+',' ',line)
+                    line = re.sub('\x0c',' ',line)
+                if config.COLLAPSE_WHITESPACE:
+                    line = re.sub(' +',' ',line)
                 self.text += line
         self.num_chars = len(set(self.text))
 

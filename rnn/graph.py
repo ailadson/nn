@@ -63,7 +63,7 @@ def build_graph(
     )
     bias_vec = tf.Variable(
         tf.zeros([num_chars]),
-        name="softmax_weights"
+        name="softmax_biases"
     )
     all_logits = []
     all_predictions = []

@@ -6,14 +6,6 @@ from text_data_set import TextDataSet
 BATCH_SIZE = 1
 STEP_SIZE = 1
 
-#build_graph
-result = config.SAMPLE_PRIME
-dataset = TextDataSet(f'../datasets/{config.DATASET_FILENAME}')
-g = graph.build_graph(
-    BATCH_SIZE, dataset.num_chars, config.NUM_LAYERS, STEP_SIZE, config.NUM_LSTM_UNITS
-)
-
-#restore session
 def load_model(session):
     print("Start Load")
     if config.TEST_MODEL_FILENAME == config.LATEST_TEST_MODEL_FILENAME:
@@ -24,27 +16,18 @@ def load_model(session):
     print(model_path)
 
     # Saver() causes an error. Stack overflow gave me this solution
-    # saver = tf.train.Saver()
-    saver = tf.train.import_meta_graph(f"{model_path}.meta")
+    saver = tf.train.Saver()
+    # saver = tf.train.import_meta_graph(f"{model_path}.meta")
     saver.restore(session, f"{model_path}")
     all_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
     for v in tf.global_variables():
         v_ = session.run(v)
+        # if v.name is config.TEST_VAR_NAME: print(v_)
     print("Load Finished!")
 
 
-
-
-with tf.Session() as session:
-    session.run(tf.global_variables_initializer())
-    load_model(session)
-    states = graph.make_initial_sampling_states(
-        config.NUM_LAYERS, config.NUM_LSTM_UNITS
-    )
-
-    #inspect the initial weights
-    print(session.run([g.weights]))
-
+def create_sample(session, g, dataset, states):
+    result = config.SAMPLE_PRIME
     print(f"Start Feeding In Prime Text: {result}")
     for char in result:
         char_encoding = dataset.char_to_one_hot(char)
@@ -69,5 +52,20 @@ with tf.Session() as session:
                 tuple(g.initial_states): tuple(states)
             }
         )
+    return result
 
-print(f"Sample: {result}")
+def run():
+    dataset = TextDataSet(f'../datasets/{config.DATASET_FILENAME}')
+    g = graph.build_graph(
+        BATCH_SIZE, dataset.num_chars, config.NUM_LAYERS, STEP_SIZE, config.NUM_LSTM_UNITS
+    )
+    with tf.Session() as session:
+        session.run(tf.global_variables_initializer())
+        load_model(session)
+        states = graph.make_initial_sampling_states(
+            config.NUM_LAYERS, config.NUM_LSTM_UNITS
+        )
+        return create_sample(session, g, dataset, states)
+
+if __name__ == '__main__':
+    print(f"Sample: {run()}")
