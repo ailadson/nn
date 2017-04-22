@@ -9,12 +9,11 @@ class Validator():
         self.sim_scores_ = None
 
     def sim_scores(self):
-        if self.sim_scores_ is not None:
-            return self.sim_scores_
+        # if self.sim_scores_ is not None:
+        #     return self.sim_scores_
 
         examples = tf.constant(self.example_words)
         norm_embedding_mat = tf.nn.l2_normalize(self.embedding_mat, 0)
-        print(norm_embedding_mat.get_shape())
         embedded_examples = tf.nn.embedding_lookup(norm_embedding_mat, examples)
 
         self.sim_scores_ = tf.matmul(
@@ -27,12 +26,11 @@ class Validator():
     def run(self, run_info):
         session = run_info.session
         scores = session.run(self.sim_scores())
-        print(type(scores))
         for i, exp_word in enumerate(self.example_words):
             score_row = np.argsort(scores[i,:])
             words = map(
                 lambda word_int: self.batcher.int_to_word(word_int),
-                score_row[:16]
+                score_row[-16:]
             )
             print(f"Top 16 Words Similar to '{self.batcher.int_to_word(exp_word)}''")
             print(list(words))
